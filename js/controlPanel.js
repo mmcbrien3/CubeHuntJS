@@ -250,7 +250,7 @@ function playGame(smooth){
             }
         }
     } else {
-        seconds = allowed - milliseconds/1000
+        //seconds = allowed - milliseconds/1000
         checkMove(key)
         resetKeys();
         if (doRectsCollide(player.returnRect(), objective.returnRect())) {
@@ -382,7 +382,7 @@ function drawAll() {
 function drawWalls() {
     for (let i = 0; i < walls.length; i++) {
         let curRect = walls[i].returnRect();
-        drawRect({x: curRect.x, y: curRect.y, width: curRect.width, height: curRect.height, color: wallColor})
+        drawRect({x: curRect.x, y: curRect.y, width: curRect.width, height: curRect.height, color: curRect.color})
     }
 }
 
