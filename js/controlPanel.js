@@ -382,7 +382,7 @@ function drawAll() {
 function drawWalls() {
     for (let i = 0; i < walls.length; i++) {
         let curRect = walls[i].returnRect();
-        drawRect({x: curRect.x, y: curRect.y, width: curRect.width, height: curRect.height, color: wallColor})
+        drawRect({x: curRect.x, y: curRect.y, width: curRect.width, height: curRect.height, color: curRect.color})
     }
 }
 
