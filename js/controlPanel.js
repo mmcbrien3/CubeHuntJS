@@ -250,7 +250,7 @@ function playGame(smooth){
             }
         }
     } else {
-        //seconds = allowed - milliseconds/1000
+        seconds = allowed - milliseconds/1000
         checkMove(key)
         resetKeys();
         if (doRectsCollide(player.returnRect(), objective.returnRect())) {
