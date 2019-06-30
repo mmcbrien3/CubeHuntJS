@@ -3,13 +3,9 @@ class square {
         this.rect = r;
     }
     
-    place(position, ctx) {
-        this.rect.x = position.x
-        this.rect.y = position.y
-        ctx.beginPath();
-        ctx.fillStyle = this.rect.color;
-        ctx.fillRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-        ctx.closePath();
+    place(position) {
+        this.rect.x = position.x;
+        this.rect.y = position.y; 
     }
     
     returnPos() {

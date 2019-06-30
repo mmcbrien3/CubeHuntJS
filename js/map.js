@@ -1,13 +1,22 @@
-/*
+
 
 class map {     
 
     constructor(s) {
+        this.objectivePos;
+        this.playerPos;
+        this.isPathwayBool;
+        this.options;
+        this.size;
+        this.graph;
+        this.empties;
+
         this.size = s
         this.graph = [];
-        for (let i = 0; i < this.size.width; i++) {
+
+        for (let i = 0; i < this.size.height; i++) {
             let newRow = [];
-            for (let j = 0; j < this.size.height; j++) {
+            for (let j = 0; j < this.size.width; j++) {
                 newRow.push("_");
             }
             this.graph.push(newRow);
@@ -15,188 +24,220 @@ class map {
         this.empties = this.getEmpties()
     }
     
-    def addPlayer(self,playerPos):
-        try:
-            this.playerPos
-        except:
+    addPlayer(playerPos) {
+        if (typeof this.playerPos === 'undefined') {
             this.playerPos = playerPos
-            this.graph[int(this.playerPos[1]/50)][int(this.playerPos[0]/50)] = 'P'
-        else:
-            this.graph[int(this.playerPos[1]/50)][int(this.playerPos[0]/50)] = '_'
+            this.graph[Math.floor(this.playerPos.y/50)][Math.floor(this.playerPos.x/50)] = 'P'
+        } else {
+            this.graph[Math.floor(this.playerPos.y/50)][Math.floor(this.playerPos.x/50)] = '_'
             this.playerPos = playerPos
-            this.graph[int(this.playerPos[1]/50)][int(this.playerPos[0]/50)] = 'P'
+            this.graph[Math.floor(this.playerPos.y/50)][Math.floor(this.playerPos.x/50)] = 'P'
+        }
+    }
         
-    def addObjective(self,objectivePos):
-        try:
-            this.objectivePos
-        except:
-            this.objectivePos= objectivePos
-            this.graph[int(this.objectivePos[1]/50)][int(this.objectivePos[0]/50)] = 'O'
-        else:
-            this.graph[int(this.objectivePos[1]/50)][int(this.objectivePos[0]/50)] = '_'
+    addObjective(objectivePos) {
+        if (typeof this.objectivePos === 'undefined') {
             this.objectivePos = objectivePos
-            this.graph[int(this.objectivePos[1]/50)][int(this.objectivePos[0]/50)] = 'O'
+            this.graph[Math.floor(this.objectivePos.y/50)][Math.floor(this.objectivePos.x/50)] = 'O'
+        } else {
+            this.graph[Math.floor(this.objectivePos.y/50)][Math.floor(this.objectivePos.x/50)] = '_'
+            this.objectivePos = objectivePos
+            this.graph[Math.floor(this.objectivePos.y/50)][Math.floor(this.objectivePos.x/50)] = 'O'
+        }
+    }
+     
        
-    def addWalls(self,walls):
-        for i in range(len(walls)):
-            this.graph[int(walls[i][1]/50)][int(walls[i][0]/50)] = 'X'
+    addWalls(walls) {
+        for (let i = 0; i < walls.length; i++) {
+            this.graph[Math.floor(walls[i].y/50)][Math.floor(walls[i].x/50)] = 'X'
+        }
+    }
        
-    def addWall(self,wallPos):
-        this.graph[int(wallPos[1]/50)][int(wallPos[0]/50)] = 'X'
+    addWall(wallPos) {
+        this.graph[Math.floor(wallPos.y/50)][Math.floor(wallPos.x/50)] = 'X'
+    }
 
-    def addRandom(self,objectType):
+    addRandom(objectType) {
         this.empties = this.getEmpties()
-        spot = random.randint(0,len(this.empties)-1)
-        position = this.empties[spot]
-        if objectType == 'objective':
+        console.log("got empties " + objectType);
+        let spot = Math.floor(Math.random() * (this.empties.length))
+        let position = this.empties[spot]
+        console.log(position);
+        if(objectType === "objective"){
+            console.log("adding objective");
             this.addObjective(position)
-            while not this.isPathway(position):
-                spot = random.randint(0,len(this.empties)-1)
+            while(!this.isPathway(position)) {
+                spot = Math.floor(Math.random() * (this.empties.length))
                 position = this.empties[spot]
+            }
             this.addObjective(position)
-        else:
+        } else {
+            console.log("adding wall");
             this.addWall(position)
+        }
+        console.log("returning from addRandom");
         return position
+    }
 
-    def removeWalls(self, wallPos):
-        if len(wallPos) > 2:
-            for i in range(len(wallPos)):
-                this.graph[int(wallPos[i][1]/50)][int(wallPos[i][0]/50)] = '_'
-        else:
-            this.graph[int(wallPos[1]/50)][int(wallPos[0]/50)] = '_'
+    removeWalls(wallPos) {
+        for (let i = 0; i < wallPos.length; i ++) {
+            this.graph[Math.floor(wallPos[i].y/50)][Math.floor(wallPos[i].x/50)] = '_'
+        }
+    }
     
-    def removeObjective(self):
-        this.graph[int(this.objectivePos[1]/50)][int(this.objectivePos[0]/50)] = '_'
+    removeObjective(self) {
+        this.graph[Math.floor(this.objectivePos.y/50)][Math.floor(this.objectivePos.x/50)] = '_'
+    }
         
-    def removePeriods(self):
-        for i in range(this.size[1]):
-            for j in range(this.size[0]):
-                if this.graph[i][j] == '.':
+    removePeriods(self) {
+        for(let i = 0; i < this.size.height; i++) {
+            for(let j = 0; j < this.size.width; j++) {
+                if (this.graph[i][j] === '.') {
                     this.graph[i][j] = '_'
+                }
+            }
+        }
+    }
 
-    def inBounds(self,position):
-        x = position[0]/50
-        y = position[1]/50
-        xVal = (x>-1 and x<this.size[0])
-        yVal = (y>-1 and y<this.size[1])
-        return xVal and yVal
-    
-    def checkMove(self,direction):
-        newPos = [0,0]
-        nextSquare = [0,0]
-        curPos = this.playerPos
-        newPos[0] = curPos[0]
-        newPos[1] = curPos[1]
-        nextSquare[0] = newPos[0]
-        nextSquare[1] = newPos[1]
-        onGrid = False
-        if direction == 'LEFT':
-            newPos[0] = curPos[0] - 5
-            newPos[1] = curPos[1]
-            nextSquare[0] = newPos[0] - (50-(newPos[0]%50))
-            nextSquare[1] = newPos[1]
-            if newPos[1]%50 == 0:
-                onGrid = True
-        elif direction == 'RIGHT':
-            newPos[0] = curPos[0] + 5
-            newPos[1] = curPos[1]
-            nextSquare[0] = newPos[0] + (50-(newPos[0]%50))
-            nextSquare[1] = newPos[1]
-            if newPos[1]%50 == 0:
-                onGrid = True
-        elif direction == 'UP':
-            newPos[0] = curPos[0]
-            newPos[1] = curPos[1] - 5
-            nextSquare[0] = newPos[0]
-            nextSquare[1] = newPos[1] - (50-(newPos[1]%50))
-            if newPos[0]%50 == 0:
-                onGrid = True
-        elif direction == 'DOWN':
-            newPos[0] = curPos[0]
-            newPos[1] = curPos[1] + 5
-            nextSquare[0] = newPos[0]
-            nextSquare[1] = newPos[1] + (50-(newPos[1]%50))
-            if newPos[0]%50 == 0:
-                onGrid = True
-        print(newPos)
-        print(nextSquare)
-        print("")
-        if onGrid and not this.getObject(nextSquare) == 'X':
+    inBounds(position) {
+        let x = position.x/50
+        let y = position.y/50
+        let xVal = (x>=0 && x<this.size.width)
+        let yVal = (y>=0 && y<this.size.height)
+        console.log(`x is ${x} and y is ${y}`)
+        return (xVal && yVal)
+    }
+
+    checkMove(key) {
+        let newPos = {x: 0, y: 0}
+        let nextSquare = {x: 0, y: 0}
+        let curPos = this.playerPos
+        newPos.x = curPos.x
+        newPos.y = curPos.y
+        nextSquare.x = newPos.x
+        nextSquare.y = newPos.y
+        let onGrid = false
+        if (key.left) {
+            newPos.x = curPos.x - 5
+            newPos.y = curPos.y
+            nextSquare.x = newPos.x - (50-(newPos.x%50))
+            nextSquare.y = newPos.y
+            if (newPos.y % 50 === 0){
+                onGrid = true
+            }
+        } 
+        if (key.right) {
+            newPos.x = curPos.x + 5
+            newPos.y = curPos.y
+            nextSquare.x = newPos.x + (50-(newPos.x%50))
+            nextSquare.y = newPos.y
+            if (newPos.y%50 === 0) {
+                onGrid = true
+            }
+        }
+        if (key.up) {
+            newPos.x = curPos.x
+            newPos.y = curPos.y - 5
+            nextSquare.x = newPos.x
+            nextSquare.y = newPos.y - (50-(newPos.y%50))
+            if (newPos.x%50 === 0){
+                onGrid = true
+            }
+        }
+        if (key.down) {
+            newPos.x = curPos.x
+            newPos.y = curPos.y + 5
+            nextSquare.x = newPos.x
+            nextSquare.y = newPos.y + (50-(newPos.y%50))
+            if(newPos.x%50 === 0) {
+                onGrid = true
+            }
+        }
+        if( onGrid && !(this.getObject(nextSquare) === 'X')){
             this.addPlayer(newPos)
             return newPos
-        return [-1,-1]
+        }
+        return {x: -1, y: -1};
+    }
     
-    def isPathway(self,oPos):
-        this.options = list()
-        originalObj = this.objectivePos
-        originalPlayer = this.playerPos
-        this.graph[int(this.playerPos[1]/50)][int(this.playerPos[0]/50)] = '_'
+    isPathway(oPos) {
+        this.options = []; 
+        let originalObj = this.objectivePos
+        let originalPlayer = this.playerPos
+        this.graph[Math.floor(this.playerPos.y/50)][Math.floor(this.playerPos.x/50)] = '_'
         this.addObjective(oPos)
-        tempOptions = this.getOptions(this.playerPos)
-        this.options = list()
-        for i in range(len(tempOptions)):
-            if this.options == True:
+        let tempOptions = this.getOptions(this.playerPos)
+        this.options = [];
+        this.isPathwayBool = false;
+
+        for (let i = 0; i < tempOptions.length; i++) {
+            if (this.isPathwayBool === true) {
+                break;
+            }
+            if (!(tempOptions[i].object === 'X') && !(tempOptions[i].object === '.') && !(tempOptions[i].object === 'O')) {
+                this.graph[Math.floor(tempOptions[i].y/50)][Math.floor(tempOptions[i].x/50)] = '.'
+                this.makeFakeMove(tempOptions[i])
+                if (this.isPathwayBool === true) {
+                    break;
+                }
+                this.options.push(tempOptions[i])
+            } else if (tempOptions[i].object === 'O'){
+                this.isPathwayBool = true;
                 break
-            if not tempOptions[i][0] == 'X' and not tempOptions[i][0] == '.' and not tempOptions[i][0] == 'O':
-                this.graph[int(tempOptions[i][2]/50)][int(tempOptions[i][1]/50)] = '.'
-                this.makeFakeMove(tempOptions[i][1:3])
-                if type(this.options) == bool:
-                    break
-                this.options += [tempOptions[i]]
-            elif tempOptions[i][0] == 'O':
-                this.options = True
-                break
+            }
+        }
         this.removePeriods()
         this.addPlayer(originalPlayer)
         this.addObjective(originalObj)
-        if this.options == True:
-            return True
-        else:
-            return False
+        return this.isPathwayBool;
+    }
     
-    def makeFakeMove(self,newPos):
-        tempOptions = this.getOptions(newPos)
-        for i in range(len(tempOptions)):
-            if this.options == True:
+    makeFakeMove(newPos) {
+        let tempOptions = this.getOptions(newPos)
+        for (let i = 0; i < tempOptions.length; i++) {
+            if(this.isPathwayBool === true) {
                 break
-            if not tempOptions[i][0] == 'X' and not tempOptions[i][0] == '.' and not tempOptions[i][0] == 'O':
-                this.graph[int(tempOptions[i][2]/50)][int(tempOptions[i][1]/50)] = '.'
-                this.makeFakeMove(tempOptions[i][1:3])
-                if type(this.options) == bool:
+            }
+            if (!(tempOptions[i].object === 'X') && !(tempOptions[i].object === '.') && !(tempOptions[i].object === 'O')) {
+                this.graph[Math.floor(tempOptions[i].y/50)][Math.floor(tempOptions[i].x/50)] = '.'
+                this.makeFakeMove(tempOptions[i])
+                if(this.isPathwayBool === true){
                     break
-                this.options += [tempOptions[i]]
-            elif tempOptions[i][0] == 'O':
-                this.options = True
+                }
+                this.options.push(tempOptions[i])
+            }else if (tempOptions[i].object === 'O'){
+                this.isPathwayBool = true;
                 break
+            }
+        }
+    }
 
-    def getOptions(self,curPos):
-        this.options = list()
-        this.options.append([this.getObject([curPos[0]-50,curPos[1]]),curPos[0]-50,curPos[1]])
-        this.options.append([this.getObject([curPos[0]+50,curPos[1]]),curPos[0]+50,curPos[1]])
-        this.options.append([this.getObject([curPos[0],curPos[1]-50]),curPos[0],curPos[1]-50])
-        this.options.append([this.getObject([curPos[0],curPos[1]+50]),curPos[0],curPos[1]+50])
+    getOptions(curPos) {
+        this.options = []
+        this.options.push({object: this.getObject({x: curPos.x-50, y: curPos.y}), x: curPos.x-50, y: curPos.y})
+        this.options.push({object: this.getObject({x: curPos.x+50, y: curPos.y}), x: curPos.x+50, y: curPos.y})
+        this.options.push({object: this.getObject({x: curPos.x, y: curPos.y-50}), x: curPos.x, y: curPos.y-50})
+        this.options.push({object: this.getObject({x: curPos.x, y: curPos.y+50}), x: curPos.x, y: curPos.y+50})
         return this.options
+    }
           
-    def getEmpties(self):
-        empties = []
-        for i in range(this.size[1]):
-            for j in range(this.size[0]):
-                if this.graph[i][j] == '_':
-                    empties.append([j*50,i*50])
+    getEmpties(self) {
+        let empties = []
+        for (let i = 0; i < this.size.height; i++){
+            for (let j = 0; j < this.size.width; j++) {
+                if (this.graph[i][j] === '_'){
+                    empties.push({x: j*50, y: i*50})
+                }
+            }
+        }
         return empties
+    }
 
-    def getObject(self,position):
-        if this.inBounds(position):
-            return this.graph[int(position[1]/50)][int(position[0]/50)]
-        else:
+    getObject(position) {
+        if (this.inBounds(position)){
+            return this.graph[Math.floor(position.y/50)][Math.floor(position.x/50)]
+        } else {
             return 'X' 
-    
-
-    def __str__(self):
-        stringThing = ''
-        for i in range(this.size[1]):
-            stringThing = stringThing + '\n'
-            for j in range(this.size[0]):
-                stringThing = stringThing + this.graph[j][i]
-        return stringThing
-        */
+        }
+    }
+}        
