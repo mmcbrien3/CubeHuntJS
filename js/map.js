@@ -58,19 +58,27 @@ class map {
     }
 
     addRandom(objectType) {
+        this.removeObjective();
         this.empties = this.getEmpties()
-        console.log("got empties " + objectType);
         let spot = Math.floor(Math.random() * (this.empties.length))
         let position = this.empties[spot]
         console.log(position);
-        if(objectType === "objective"){
-            console.log("adding objective");
+        if(objectType === "objective") {
             this.addObjective(position)
+            let retries = 0;
             while(!this.isPathway(position)) {
+                this.removeObjective()
+                this.empties = this.getEmpties()
+                retries += 1;
                 spot = Math.floor(Math.random() * (this.empties.length))
                 position = this.empties[spot]
+                this.addObjective(position);
+                if (retries >1000) {
+                    let avar=0;
+                    this.getEmpties()
+                }
             }
-            this.addObjective(position)
+            
         } else {
             console.log("adding wall");
             this.addWall(position)
@@ -85,11 +93,14 @@ class map {
         }
     }
     
-    removeObjective(self) {
+    removeObjective() {
+        if (typeof this.objectivePos === 'undefined'){
+            return;
+        }
         this.graph[Math.floor(this.objectivePos.y/50)][Math.floor(this.objectivePos.x/50)] = '_'
     }
         
-    removePeriods(self) {
+    removePeriods() {
         for(let i = 0; i < this.size.height; i++) {
             for(let j = 0; j < this.size.width; j++) {
                 if (this.graph[i][j] === '.') {
@@ -213,6 +224,8 @@ class map {
     }
 
     getOptions(curPos) {
+        curPos.x = Math.floor(curPos.x / 50) * 50;
+        curPos.y = Math.floor(curPos.y / 50) * 50;
         this.options = []
         this.options.push({object: this.getObject({x: curPos.x-50, y: curPos.y}), x: curPos.x-50, y: curPos.y})
         this.options.push({object: this.getObject({x: curPos.x+50, y: curPos.y}), x: curPos.x+50, y: curPos.y})
@@ -225,7 +238,7 @@ class map {
         let empties = []
         for (let i = 0; i < this.size.height; i++){
             for (let j = 0; j < this.size.width; j++) {
-                if (this.graph[i][j] === '_'){
+                if (this.graph[i][j] === '_'){// || this.graph[i][j] === "P"){
                     empties.push({x: j*50, y: i*50})
                 }
             }

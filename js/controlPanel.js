@@ -9,7 +9,7 @@ document.addEventListener("keyup", handleGameKeysUp, false);
 var size = 10;
 var key = {left: false, right: false, up: false, down: false};
 var playingGame = false
-var playSmooth = false
+var playSmooth = true
 
 var wallColor = "#C69354"
 var bgColor = "#00254C"
@@ -128,19 +128,19 @@ function handleGameKeysDown(e) {
             return;
         }
     }
-    else if((e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") && (playSmooth || key.left === false)) {
+    if((e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") && (playSmooth || key.left === false)) {
         key.left = true;
         if (!playSmooth) {
             return;
         }
     }
-    else if((e.key == "Up" || e.key == "ArrowUp" || e.key == "w") && (playSmooth || key.up === false)) {
+    if((e.key == "Up" || e.key == "ArrowUp" || e.key == "w") && (playSmooth || key.up === false)) {
         key.up = true;
         if (!playSmooth) {
             return;
         }
     }
-    else if((e.key == "Down" || e.key == "ArrowDown" || e.key == "s") && (playSmooth || key.down === false)) {
+    if((e.key == "Down" || e.key == "ArrowDown" || e.key == "s") && (playSmooth || key.down === false)) {
         key.down = true;
         if (!playSmooth) {
             return;
@@ -152,13 +152,13 @@ function handleGameKeysUp(e) {
     if(e.key == "Right" || e.key == "ArrowRight" || e.key == "d") {
         key.right = false;
     }
-    else if(e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") {
+    if(e.key == "Left" || e.key == "ArrowLeft" || e.key == "a") {
         key.left = false;
     }
-    else if(e.key == "Up" || e.key == "ArrowUp" || e.key == "w") {
+    if(e.key == "Up" || e.key == "ArrowUp" || e.key == "w") {
         key.up = false;
     }
-    else if(e.key == "Down" || e.key == "ArrowDown" || e.key == "s") {
+    if(e.key == "Down" || e.key == "ArrowDown" || e.key == "s") {
         key.down = false;
     }
 }
@@ -184,18 +184,19 @@ function resetKeys() {
 function playGame(smooth){
     if (smooth) {
         seconds = allowed - milliseconds/1000
-        if (objective.returnPos() === {x: -50, y: -50} || doRectsCollide(player.returnRect(), objective.returnRect())) {
-            tempPos = pathway.addRandom('objective')
-            if (doRectsCollide(player.returnRect(), objective.returnRect())) {
-                pathway.removeObjective()
-                objective.place({x: -50, y: -50})
-            } else {
-                objective.place(tempPos)
-            }
+        if (key.left === true) {
+            checkMove("LEFT");
         }
-        checkMove(key)
+        if (key.right === true) {
+            checkMove("RIGHT");
+        }
+        if (key.up === true) {
+            checkMove("UP");
+        }
+        if (key.down === true) {
+            checkMove("DOWN");
+        }
         resetKeys();
-        console.log(key)
         pathway.addPlayer(player.returnPos())
         if (doRectsCollide(player.returnRect(), objective.returnRect())) {
             if (walls.length === (size*size-2)) {
@@ -227,7 +228,13 @@ function playGame(smooth){
                 for (let i = 0; i < options.length; i++) {
                     neighbors.push(options[i].object)
                 }
-                while (neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) {
+                while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
+                    if (walls.length === size * size - 4) {
+                        score += 2;
+                        walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
+                        walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
+                        return;
+                    }
                     pathway.removeWalls([tempPos])
                     tempPos = pathway.addRandom('wall')
                     newWall.place(tempPos)
@@ -236,10 +243,6 @@ function playGame(smooth){
                     for (let i = 0; i < options.length; i++) {
                         neighbors.push(options[i].object)
                     }
-                }
-                if (doRectsCollide(player.returnRect(), newWall.returnRect())) {
-                    pathway.removeWalls([tempPos])
-                    tempPos = {x: -50, y: -50}
                 }
                 newWall.place(tempPos);
                 walls.push(newWall)
@@ -251,7 +254,18 @@ function playGame(smooth){
         }
     } else {
         seconds = allowed - milliseconds/1000
-        checkMove(key)
+        if (key.left === true) {
+            checkMove("LEFT");
+        }
+        else if (key.right === true) {
+            checkMove("RIGHT");
+        }
+        else if (key.up === true) {
+            checkMove("UP");
+        }
+        else if (key.down === true) {
+            checkMove("DOWN");
+        }
         resetKeys();
         if (doRectsCollide(player.returnRect(), objective.returnRect())) {
             if (walls.length === (size*size-2)) {
@@ -281,14 +295,16 @@ function playGame(smooth){
                     newWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor})
                 }
                 let tempPos = pathway.addRandom('wall')
+                newWall.place(tempPos)
                 let options = pathway.getOptions(player.returnPos())
                 let neighbors = []
                 for (let i = 0; i < options.length; i ++) {
                     neighbors.push(options[i].object);
                 }
-                while (neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) {
+                while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1)  || doRectsCollide(player.returnRect(), newWall.returnRect())) {
                     pathway.removeWalls([tempPos])
                     tempPos = pathway.addRandom('wall')
+                    newWall.place(tempPos)
                     options = pathway.getOptions(player.returnPos())
                     neighbors = []
                     for (let i = 0; i < options.length; i ++) {
@@ -374,8 +390,12 @@ function drawAll() {
 
     ctx.fillStyle = "#000000";
     ctx.font = "16px Arial";
-    ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2));
     ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
+    ctx.fillStyle = "#000000";
+    ctx.font = "bold 16px Arial";
+    ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
+    
+    
 
 }
 
@@ -430,20 +450,16 @@ function checkMove(direction) {
     if (playSmooth) {
         change = 5
     }
-    if (direction.left === true) {
+    if (direction === "LEFT") {
         newPos.x = curPos.x - change
-        newPos.y = curPos.y
     } 
-    if (direction.right === true) {
+    if (direction === "RIGHT") {
         newPos.x = curPos.x + change
-        newPos.y = curPos.y
     } 
-    if (direction.up === true) {
-        newPos.x = curPos.x
+    if (direction === "UP") {
         newPos.y = curPos.y - change
     } 
-    if (direction.down === true) {
-        newPos.x = curPos.x
+    if (direction === "DOWN") {
         newPos.y = curPos.y + change
     }
     if (playSmooth) {
