@@ -46,6 +46,8 @@ var smoothLabel = "Smooth";
 var timeLabel = "0.0";
 var scoreLabel = "0";
 
+setInterval(gameLoop, 10);
+
 function gameLoop() {
     if (playingGame) {
         if (seconds > 0) {
@@ -54,10 +56,8 @@ function gameLoop() {
         } else {
             loseGame()
         }
-    } else {
-        menuScreen()
     }
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(drawAll);
 }
 
 function drawRect(rect) {
@@ -66,10 +66,7 @@ function drawRect(rect) {
     ctx.fillStyle = rect.color;
     ctx.fill();
 }
-                
-function menuScreen() {
-    drawMenu()
-}
+
 
 function checkClickInRect(x, y, rect) {
     if (x >= rect.x && x <= rect.x + rect.width) {
@@ -322,12 +319,12 @@ function playGame(smooth){
     }
     timeLabel = (Math.round(seconds * 10) / 10).toString();
     scoreLabel = score.toString();
-    drawAll()
 }
 
 function loseGame(self) {
     if (lost) {
         lost = false 
+        playinGame = false;
     }
 }
 
@@ -353,7 +350,6 @@ function setGame() {
     let tempPos = pathway.addRandom('objective')
     objective.place(tempPos)
     key = {left: false, right: false, up: false, down: false};
-    drawAll()
 }
     
 function addWalls() {
@@ -380,20 +376,24 @@ function drawBackground() {
 }
 
 function drawAll() {
-    drawBackground();
-    drawWalls();
-    drawRect(player.returnRect());
-    drawRect(objective.returnRect());
-    for (let i = 0; i < walls.length; i++) {
-        drawRect(walls[i].returnRect);
-    }
+    if (playingGame) {
+        drawBackground();
+        drawWalls();
+        drawRect(player.returnRect());
+        drawRect(objective.returnRect());
+        for (let i = 0; i < walls.length; i++) {
+            drawRect(walls[i].returnRect);
+        }
 
-    ctx.fillStyle = "#000000";
-    ctx.font = "16px Arial";
-    ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
-    ctx.fillStyle = "#000000";
-    ctx.font = "bold 16px Arial";
-    ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
+        ctx.fillStyle = "#000000";
+        ctx.font = "16px Arial";
+        ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
+    } else {
+        drawMenu()
+    }
     
     
 
