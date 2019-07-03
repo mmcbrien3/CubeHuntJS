@@ -62,7 +62,6 @@ class map {
         this.empties = this.getEmpties()
         let spot = Math.floor(Math.random() * (this.empties.length))
         let position = this.empties[spot]
-        console.log(position);
         if(objectType === "objective") {
             this.addObjective(position)
             let retries = 0;
@@ -80,10 +79,8 @@ class map {
             }
             
         } else {
-            console.log("adding wall");
             this.addWall(position)
         }
-        console.log("returning from addRandom");
         return position
     }
 
@@ -115,7 +112,6 @@ class map {
         let y = position.y/50
         let xVal = (x>=0 && x<this.size.width)
         let yVal = (y>=0 && y<this.size.height)
-        console.log(`x is ${x} and y is ${y}`)
         return (xVal && yVal)
     }
 
@@ -238,7 +234,7 @@ class map {
         let empties = []
         for (let i = 0; i < this.size.height; i++){
             for (let j = 0; j < this.size.width; j++) {
-                if (this.graph[i][j] === '_'){// || this.graph[i][j] === "P"){
+                if (this.graph[i][j] === '_'){
                     empties.push({x: j*50, y: i*50})
                 }
             }

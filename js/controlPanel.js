@@ -2,7 +2,9 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 
-canvas.addEventListener("click", handleMenuClicks, false);
+canvas.addEventListener("mousedown", handleMenuClicks, false);
+canvas.addEventListener("mouseup", handleRelease, false);
+canvas.addEventListener("mousemove", handleMouseMove, false);
 document.addEventListener("keydown", handleGameKeysDown, false);
 document.addEventListener("keyup", handleGameKeysUp, false);
 
@@ -37,7 +39,10 @@ var walls = addWalls()
 pathway.addWalls(wallPos)
 var objective = new square(objectiveSymbol)
 
-
+let xMouseMovement = 0;
+let yMouseMovement = 0;
+let isMouseDown = 0;
+let curMouseEvent = null;
 var welcomeMessage = "CUBE HUNT";
 var sixLabel = "Mini";
 var tenLabel = "Normal";
@@ -45,6 +50,7 @@ var fourteenLabel = "Massive";
 var smoothLabel = "Smooth";
 var timeLabel = "0.0";
 var scoreLabel = "0";
+var smoothBasePlayerSpeed = 6;
 
 setInterval(gameLoop, 10);
 
@@ -85,8 +91,22 @@ function getMousePos(c, evt) {
     };
 }
 
+function handleRelease(event) {
+    isMouseDown = false;
+}
+
+function handleMouseMove(event) {
+    if (playingGame && isMouseDown) {
+        curMouseEvent = event;
+        return;
+    }
+}
+
 function handleMenuClicks(event) {
+    
     if (playingGame) {
+        isMouseDown = true;
+        curMouseEvent = event;
         return;
     }
     mp = getMousePos(canvas, event);
@@ -171,29 +191,62 @@ function doRectsCollide(rect1, rect2) {
 }
 
 function resetKeys() {
-    if(playSmooth) { return; }
+    if(playSmooth && !isMouseDown) { return; }
     key.right = false;
     key.left = false;
     key.up = false;
     key.down = false;
 }
 
-function playGame(smooth){
+function getDistTweenMouseAndPlayer(mousePos, playerPos) {
+    let xDist = Math.pow(mousePos.x - playerPos.x, 2);
+    let yDist = Math.pow(mousePos.y - playerPos.y, 2);
+    return Math.sqrt(xDist + yDist);
+}
+
+function getMaxDistanceBySize() {
+    return Math.sqrt(Math.pow(canvas.width, 2) + Math.pow(canvas.height, 2));
+}
+
+function getMousePlayerSpeed() {
+    let distance = getDistTweenMouseAndPlayer(getMousePos(canvas, curMouseEvent), player.returnPos());
+    let minSpeed = 1.5;
+    let maxSpeed = 7;
+    let maxDistance = getMaxDistanceBySize();
+    let multiplier = 3;
+    let speed = smoothBasePlayerSpeed * multiplier * (distance / maxDistance);
+    speed = speed > maxSpeed ? maxSpeed : speed;
+    speed = speed < minSpeed ? minSpeed : speed;
+    if (speed === maxSpeed) {
+        var breakpoint = 1;
+    }
+    return speed;
+}
+
+function playGame(smooth) {
     if (smooth) {
         seconds = allowed - milliseconds/1000
-        if (key.left === true) {
-            checkMove("LEFT");
+        if (isMouseDown) {
+            mp = getMousePos(canvas, curMouseEvent)
+            x = mp.x;
+            y = mp.y
+            xMouseMovement = 0;
+            yMouseMovement = 0;
+            let gridSize = 50;
+            if (x > player.returnPos().x + gridSize / 2) {
+                key.right = true;
+            } else if (x < player.returnPos().x + gridSize / 2) {
+                key.left = true;
+            }
+            if (y > player.returnPos().y + gridSize / 2) {
+                key.down = true;
+            } else if (y < player.returnPos().y + gridSize / 2){
+                key.up = true;
+            }
         }
-        if (key.right === true) {
-            checkMove("RIGHT");
-        }
-        if (key.up === true) {
-            checkMove("UP");
-        }
-        if (key.down === true) {
-            checkMove("DOWN");
-        }
-        resetKeys();
+        key = doubleCheckMoves(key)
+        
+        resetKeys(isMouseDown);
         pathway.addPlayer(player.returnPos())
         if (doRectsCollide(player.returnRect(), objective.returnRect())) {
             if (walls.length === (size*size-2)) {
@@ -321,6 +374,72 @@ function playGame(smooth){
     scoreLabel = score.toString();
 }
 
+function doubleCheckMoves(key) {
+    let originalKey = Object.assign({}, key);
+    let playerOriginalPos = Object.assign({}, player.returnRect());
+    let numMovesUp = checkIndividualMovesUp(key)
+    console.log('moving')
+    console.log(numMovesUp);
+    player.place(playerOriginalPos);
+    let numMovesDown = checkIndividualMovesDown(key)
+    console.log(numMovesDown);
+
+    player.place(playerOriginalPos);
+
+    if (numMovesUp >= numMovesDown) {
+        checkIndividualMovesUp(key);
+    } else {
+        checkIndividualMovesDown(key);
+    }
+    return originalKey;
+}
+
+function checkIndividualMovesUp(key) {
+    let numMoves = 0;
+    if (key.left === true) {
+        if(checkMove("LEFT")) {
+            numMoves+=1;
+        }
+    } else if (key.right === true) {
+        if(checkMove("RIGHT")) {
+            numMoves+=1;
+        }
+    }
+    if (key.up === true) {
+        if(checkMove("UP")) {
+            numMoves+=1;
+        }
+    } else if (key.down === true) {
+        if(checkMove("DOWN")) {
+            numMoves+=1;
+        }
+    }
+    return numMoves;
+}
+
+function checkIndividualMovesDown(key) {
+    let numMoves = 0;
+    if (key.down === true) {
+        if(checkMove("DOWN")) {
+            numMoves+=1;
+        }
+    } else if (key.up === true) {
+        if(checkMove("UP")) {
+            numMoves+=1;
+        }
+    }
+    if (key.right === true) {
+        if(checkMove("RIGHT")) {
+            numMoves+=1;
+        }
+    }else if (key.left === true) {
+        if(checkMove("LEFT")) {
+            numMoves+=1;
+        }
+    }
+    return numMoves;
+}
+
 function loseGame(self) {
     if (lost) {
         lost = false 
@@ -441,46 +560,85 @@ function resetClock() {
     milliseconds = 0
 }
 
+function arePositionsEqual(posOne, posTwo) {
+    if (posOne.x === posTwo.x 
+        && posOne.y === posTwo.y) {
+            return true;
+        }
+        return false;
+}
+
 function checkMove(direction) {
+    let originalPos = player.returnPos();
     let newPos = {x: 0, y: 0}
     let curPos = player.returnPos()
+    let moduloMoveX = curPos.x;
+    let moduloMoveY = curPos.y
+    let gridSize = 50;
     newPos.x = curPos.x
     newPos.y = curPos.y
     let change = 50
     if (playSmooth) {
-        change = 5
+        change = smoothBasePlayerSpeed;
+        if (isMouseDown) {
+            change = getMousePlayerSpeed();
+        }
     }
     if (direction === "LEFT") {
         newPos.x = curPos.x - change
-    } 
-    if (direction === "RIGHT") {
+        moduloMoveX = curPos.x - (curPos.x % gridSize);
+    } else if (direction === "RIGHT") {
         newPos.x = curPos.x + change
-    } 
-    if (direction === "UP") {
+        moduloMoveX = curPos.x + (gridSize - curPos.x % gridSize);
+    } else if (direction === "UP") {
         newPos.y = curPos.y - change
-    } 
-    if (direction === "DOWN") {
+        moduloMoveY = curPos.y - (curPos.y % gridSize);
+    } else if (direction === "DOWN") {
         newPos.y = curPos.y + change
+        moduloMoveY = curPos.y + (gridSize - curPos.y % gridSize);
     }
+
     if (playSmooth) {
-        if (newPos.x >= 0 && newPos.x <=size*50-50 && newPos.y >= 0 && newPos.y <=size*50-50) {
-            let collided = false
-            player.move(newPos)
-            for (let i = 0; i < walls.length; i++) {
-                if (doRectsCollide(player.returnRect(), walls[i].returnRect())) {
-                    collided = true
-                }
-            }
-            if(collided) {
-                player.move(curPos)
-            }
+        let firstCheck = newPos;
+        let secondCheck = {x: moduloMoveX, y: moduloMoveY}
+        let modX = newPos.x % gridSize
+        let modY = newPos.y % gridSize
+        let modXDiff = Math.abs(moduloMoveX - curPos.x);
+        let modYDiff = Math.abs(moduloMoveY - curPos.y);
+        if (((modX < change || (gridSize - modX > -change)) || (modY < change || (gridSize - modY > -change))) 
+        && modXDiff < change && modYDiff < change && (modXDiff !== 0 || modYDiff !== 0)) {
+            firstCheck = {x: moduloMoveX, y: moduloMoveY}
+            secondCheck = newPos;
         }
-    } else {
+        let smoothMoveAttempt = checkBoundaryAndCollision(curPos, firstCheck);
+        if (arePositionsEqual(originalPos, player.returnPos())) {
+            checkBoundaryAndCollision(curPos, secondCheck);
+        }
+    } else if (!playSmooth) {
         if(pathway.getObject(newPos) !== 'X') {
             player.move(newPos)
             pathway.addPlayer(newPos)
         }
     }
+    return !arePositionsEqual(originalPos, player.returnPos())
+}
+
+function checkBoundaryAndCollision(curPos, newPos) {
+    if (newPos.x >= 0 && newPos.x <=size*50-50 && newPos.y >= 0 && newPos.y <=size*50-50) {
+        let collided = false
+        player.move(newPos)
+        for (let i = 0; i < walls.length; i++) {
+            if (doRectsCollide(player.returnRect(), walls[i].returnRect())) {
+                collided = true
+            }
+        }
+        if(collided) {
+            player.move(curPos)
+            return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 gameLoop()
