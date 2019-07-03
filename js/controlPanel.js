@@ -50,7 +50,7 @@ var fourteenLabel = "Massive";
 var smoothLabel = "Smooth";
 var timeLabel = "0.0";
 var scoreLabel = "0";
-var smoothBasePlayerSpeed = 6;
+var smoothBasePlayerSpeed = 5;
 
 setInterval(gameLoop, 10);
 
@@ -210,10 +210,10 @@ function getMaxDistanceBySize() {
 
 function getMousePlayerSpeed() {
     let distance = getDistTweenMouseAndPlayer(getMousePos(canvas, curMouseEvent), player.returnPos());
-    let minSpeed = 1.5;
+    let minSpeed = 3;
     let maxSpeed = 7;
     let maxDistance = getMaxDistanceBySize();
-    let multiplier = 3;
+    let multiplier = 3.1415;
     let speed = smoothBasePlayerSpeed * multiplier * (distance / maxDistance);
     speed = speed > maxSpeed ? maxSpeed : speed;
     speed = speed < minSpeed ? minSpeed : speed;
