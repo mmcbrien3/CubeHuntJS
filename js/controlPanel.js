@@ -3,8 +3,11 @@ var ctx = canvas.getContext("2d");
 
 
 canvas.addEventListener("mousedown", handleMenuClicks, false);
+canvas.addEventListener("touchstart", handleMenuClicks, false);
 canvas.addEventListener("mouseup", handleRelease, false);
+canvas.addEventListener("touchend", handleRelease, false);
 canvas.addEventListener("mousemove", handleMouseMove, false);
+canvas.addEventListener("touchmove", handleMouseMove, false);
 document.addEventListener("keydown", handleGameKeysDown, false);
 document.addEventListener("keyup", handleGameKeysUp, false);
 
@@ -85,10 +88,17 @@ function checkClickInRect(x, y, rect) {
 
 function getMousePos(c, evt) {
     var rect = c.getBoundingClientRect();
-    return {
-        x: (evt.clientX - rect.left) / (rect.right - rect.left) * c.width,
-        y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * c.height
-    };
+    if (typeof evt.clientX !== 'undefined') {
+        return {
+            x: (evt.clientX - rect.left) / (rect.right - rect.left) * c.width,
+            y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * c.height
+        };
+    } else {
+        return {
+            x: (evt.touches[0].clientX - rect.left) / (rect.right - rect.left) * c.width,
+            y: (evt.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * c.height
+        };
+    }
 }
 
 function handleRelease(event) {
