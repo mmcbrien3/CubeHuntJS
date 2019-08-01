@@ -50,6 +50,7 @@ function resetGame() {
     resetScreen();
     resetClock();
     clearInterval(timerInterval);
+    drawAll();
 }
 
 var timerInterval;
@@ -79,7 +80,7 @@ var fourteenLabel = "Massive";
 var smoothLabel = "Smooth";
 var timeLabel = "0.0";
 var scoreLabel = "0";
-var smoothBasePlayerSpeed = 10;
+var smoothBasePlayerSpeed = 6;
 
 setInterval(gameLoop, 10);
 
@@ -349,7 +350,7 @@ function playGame(smooth) {
                 let wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
                 score += wallsAddedInUnreachableLocations.length;
                 for (let w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
-                    var unreachableWall;
+                    var unreachableWall = null;
                     if (level > 3) {
                         unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
                     } else {
@@ -359,7 +360,7 @@ function playGame(smooth) {
                     walls.push(unreachableWall)
                     wallPos.push(unreachableWall.returnPos())
                 }
-
+		console.log("There are " + walls.length + "walls right now");
                 if (walls.length >= (size*size-2)) {
                     score += 2;
                     levelUpNoScoreIncrement();

@@ -46,7 +46,6 @@ class map {
         }
     }
      
-       
     addWalls(walls) {
         for (let i = 0; i < walls.length; i++) {
             this.graph[Math.floor(walls[i].y/50)][Math.floor(walls[i].x/50)] = 'X'
@@ -64,12 +63,15 @@ class map {
         for (let i = 0; i < this.empties.length; i++) {
             this.addObjective(this.empties[i]);
             let isReachable = this.isPathway(this.empties[i]);
-            this.removeObjective();
             if (!isReachable) {
                 this.addWall(this.empties[i]);
                 wallsAdded.push(this.empties[i])
             }
         }
+	this.removeObjective();
+	for (let i = 0; i < wallsAdded.length; i++) {
+	    this.addWall(wallsAdded[i]);
+	}
         return wallsAdded;
     }
 
