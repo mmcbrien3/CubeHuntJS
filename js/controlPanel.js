@@ -25,6 +25,7 @@ var sixButton = {x: 50, y: 225, width: 100, height: 50, color: "#C69354"};
 var tenButton = {x: 200, y: 225, width: 100, height: 50, color: "#C69354"};
 var fourteenButton = {x: 350, y: 225, width: 100, height: 50, color: "#C69354"};
 var smoothButton = {x: 200, y: 425, width: 100, height: 50, color: "#00FF00"};
+var jsSquare = {x: 260, y: 125, width: 50, height: 50, color: "#F1DA4E"};
 
 var playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
 var objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
@@ -82,6 +83,8 @@ var sixLabel = "Mini";
 var tenLabel = "Normal";
 var fourteenLabel = "Massive";
 var smoothLabel = "Smooth";
+var pureJsPureLabel = "Pure";
+var pureJsJsLabel = "JS";
 var timeLabel = "0.0";
 var scoreLabel = "0";
 var smoothBasePlayerSpeed = 6;
@@ -177,7 +180,7 @@ function handleMenuClicks(event) {
         setGame();
     }
     else if (checkClickInRect(x, y, smoothButton)) {
-        playSmooth = !playSmooth;
+        //playSmooth = !playSmooth;
     }
 }
 
@@ -616,24 +619,27 @@ function drawMenu() {
     drawRect(sixButton)
     drawRect(tenButton)
     drawRect(fourteenButton)
-    if (playSmooth) {
+    drawRect(jsSquare);
+    /*if (playSmooth) {
         smoothButton.color = "#00ff00"
         drawRect(smoothButton)
     } else {
         smoothButton.color = "#ff0000"
         drawRect(smoothButton)
-    }
+    }*/
     ctx.font = "30px Arial";
     ctx.fillStyle = "#ffffff";
     ctx.fillText(welcomeMessage, 160, 100); 
+    ctx.fillText(pureJsPureLabel, 185, 170);
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000000";
     ctx.fillText(sixLabel, 83, 255); 
     ctx.fillText(tenLabel, 223, 255); 
     ctx.fillText(fourteenLabel, 370, 255); 
-    ctx.fillText(smoothLabel, 222, 455); 
-            
+    //ctx.fillText(smoothLabel, 222, 455);
+    ctx.font = "30px Arial";
+    ctx.fillText(pureJsJsLabel, 275, 170);
 }
 
         
