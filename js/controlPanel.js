@@ -29,7 +29,32 @@ var smoothButton = {x: 200, y: 425, width: 100, height: 50, color: "#00FF00"};
 var playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
 var objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
 
+function resetGame() {
+    level = 1
+    score = 0
+    lowestTime = size/2
+    milliseconds = 0
+    allowed = size
+    seconds = allowed
+    pathway = new map({width: size, height: size})
+    player = new playerSquare(playerSymbol)
+    wallPos = []
+    walls = addWalls()
+    pathway.addWalls(wallPos)
+    objective = new square(objectiveSymbol)
+
+    xMouseMovement = 0;
+    yMouseMovement = 0;
+    isMouseDown = 0;
+    curMouseEvent = null;
+    resetScreen();
+    resetClock();
+    clearInterval(timerInterval);
+}
+
+var timerInterval;
 var level = 1
+
 var score = 0
 var lowestTime = size/2
 var milliseconds = 0
@@ -46,6 +71,7 @@ let xMouseMovement = 0;
 let yMouseMovement = 0;
 let isMouseDown = 0;
 let curMouseEvent = null;
+
 var welcomeMessage = "CUBE HUNT";
 var sixLabel = "Mini";
 var tenLabel = "Normal";
@@ -65,6 +91,8 @@ function gameLoop() {
         } else {
             loseGame()
         }
+    } else {
+
     }
     requestAnimationFrame(drawAll);
 }
@@ -148,7 +176,17 @@ function handleMenuClicks(event) {
     }
 }
 
+function resetScreen() {
+    canvas.width = 500;
+    canvas.height = 500;
+}
+
 function handleGameKeysDown(e) {
+    if (e.keyCode === 27) {
+        playingGame = false;
+        resetGame();
+        return;
+    }
     if((e.key == "Right" || e.key == "ArrowRight" || e.key == "d") && (playSmooth || key.right === false)) {
         key.right = true;
         if (!playSmooth) {
@@ -271,7 +309,6 @@ function playGame(smooth) {
                 objective.place(tempPos)
                 allowed = size
                 seconds = allowed
-                milliseconds = 0
                 resetClock()
             } else {
                 score+=1
@@ -344,7 +381,6 @@ function playGame(smooth) {
                 objective.place(tempPos)
                 allowed = size
                 seconds = allowed
-                milliseconds = 0
                 resetClock()
             } else {
                 score+=1
@@ -388,11 +424,8 @@ function doubleCheckMoves(key) {
     let originalKey = Object.assign({}, key);
     let playerOriginalPos = Object.assign({}, player.returnRect());
     let numMovesUp = checkIndividualMovesUp(key)
-    console.log('moving')
-    console.log(numMovesUp);
     player.place(playerOriginalPos);
     let numMovesDown = checkIndividualMovesDown(key)
-    console.log(numMovesDown);
 
     player.place(playerOriginalPos);
 
@@ -462,7 +495,7 @@ function updateClock() {
 }
 
 function setGame() {
-    setInterval(updateClock, 100);
+    timerInterval = setInterval(updateClock, 100);
     level = 1
     score = 0
     lowestTime = size/2
@@ -563,6 +596,7 @@ function drawMenu() {
 
         
 function resetClock() {
+    milliseconds = 0;
     if (allowed > lowestTime) {
         allowed -= .5
     }
