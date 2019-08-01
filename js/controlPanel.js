@@ -13,13 +13,13 @@ document.addEventListener("keyup", handleGameKeysUp, false);
 
 var size = 10;
 var key = {left: false, right: false, up: false, down: false};
-var playingGame = false
-var playSmooth = true
+var playingGame = false;
+var playSmooth = true;
 
-var wallColor = "#C69354"
-var bgColor = "#00254C"
-var menuColor = wallColor
-var rainbowColors = ["#F49AC2","#AEC6CF","#77BE77","#CFCFC4","#FDFD96","#826953"]
+var wallColor = "#C69354";
+var bgColor = "#00254C";
+var menuColor = wallColor;
+var rainbowColors = ["#F49AC2","#AEC6CF","#77BE77","#CFCFC4","#FDFD96","#826953"];
 
 var sixButton = {x: 50, y: 225, width: 100, height: 50, color: "#C69354"};
 var tenButton = {x: 200, y: 225, width: 100, height: 50, color: "#C69354"};
@@ -32,22 +32,22 @@ var objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
 
 function resetGame() {
     playingGame = false;
-    level = 1
-    score = 0
-    lowestTime = size/2
-    milliseconds = 0
+    level = 1;
+    score = 0;
+    lowestTime = size/2;
+    milliseconds = 0;
     size = 10;
-    allowed = size
-    seconds = allowed
-    pathway = new map({width: size, height: size})
+    allowed = size;
+    seconds = allowed;
+    pathway = new map({width: size, height: size});
     playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
     objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
  
-    player = new playerSquare(playerSymbol)
-    wallPos = []
-    walls = addWalls()
-    pathway.addWalls(wallPos)
-    objective = new square(objectiveSymbol)
+    player = new playerSquare(playerSymbol);
+    wallPos = [];
+    walls = addWalls();
+    pathway.addWalls(wallPos);
+    objective = new square(objectiveSymbol);
 
     xMouseMovement = 0;
     yMouseMovement = 0;
@@ -59,24 +59,24 @@ function resetGame() {
 }
 
 var timerInterval;
-var level = 1
+var level = 1;
 
-var score = 0
-var lowestTime = size/2
-var milliseconds = 0
-var allowed = size
-var seconds = allowed
-var pathway = new map({width: size, height: size})
-var player = new playerSquare(playerSymbol)
-var wallPos = []
-var walls = addWalls()
-pathway.addWalls(wallPos)
-var objective = new square(objectiveSymbol)
+var score = 0;
+var lowestTime = size/2;
+var milliseconds = 0;
+var allowed = size;
+var seconds = allowed;
+var pathway = new map({width: size, height: size});
+var player = new playerSquare(playerSymbol);
+var wallPos = [];
+var walls = addWalls();
+pathway.addWalls(wallPos);
+var objective = new square(objectiveSymbol);
 
-let xMouseMovement = 0;
-let yMouseMovement = 0;
-let isMouseDown = 0;
-let curMouseEvent = null;
+var xMouseMovement = 0;
+var yMouseMovement = 0;
+var isMouseDown = 0;
+var curMouseEvent = null;
 
 var welcomeMessage = "CUBE HUNT";
 var sixLabel = "Mini";
@@ -94,10 +94,10 @@ setInterval(gameLoop, 10);
 function gameLoop() {
     if (playingGame) {
         if (seconds > 0) {
-            lost = true
+            lost = true;
             playGame(playSmooth)
         } else {
-            loseGame()
+            loseGame();
         }
     } else {
 
@@ -156,8 +156,8 @@ function handleMenuClicks(event) {
         return;
     }
     mp = getMousePos(canvas, event);
-    x =  mp.x
-    y = mp.y
+    x =  mp.x;
+    y = mp.y;
     if (checkClickInRect(x, y, sixButton)) {
         size = 6;
         playingGame = true;
@@ -255,8 +255,8 @@ function resetKeys() {
 }
 
 function getDistTweenMouseAndPlayer(mousePos, playerPos) {
-    let xDist = Math.pow(mousePos.x - playerPos.x, 2);
-    let yDist = Math.pow(mousePos.y - playerPos.y, 2);
+    var xDist = Math.pow(mousePos.x - playerPos.x, 2);
+    var yDist = Math.pow(mousePos.y - playerPos.y, 2);
     return Math.sqrt(xDist + yDist);
 }
 
@@ -265,12 +265,12 @@ function getMaxDistanceBySize() {
 }
 
 function getMousePlayerSpeed() {
-    let distance = getDistTweenMouseAndPlayer(getMousePos(canvas, curMouseEvent), player.returnPos());
-    let minSpeed = 3;
-    let maxSpeed = 7;
-    let maxDistance = getMaxDistanceBySize();
-    let multiplier = 3.1415;
-    let speed = smoothBasePlayerSpeed * multiplier * (distance / maxDistance);
+    var distance = getDistTweenMouseAndPlayer(getMousePos(canvas, curMouseEvent), player.returnPos());
+    var minSpeed = 3;
+    var maxSpeed = 7;
+    var maxDistance = getMaxDistanceBySize();
+    var multiplier = 3.1415;
+    var speed = smoothBasePlayerSpeed * multiplier * (distance / maxDistance);
     speed = speed > maxSpeed ? maxSpeed : speed;
     speed = speed < minSpeed ? minSpeed : speed;
     if (speed === maxSpeed) {
@@ -281,14 +281,14 @@ function getMousePlayerSpeed() {
 
 function playGame(smooth) {
     if (smooth) {
-        seconds = allowed - milliseconds/1000
+        seconds = allowed - milliseconds/1000;
         if (isMouseDown) {
-            mp = getMousePos(canvas, curMouseEvent)
+            mp = getMousePos(canvas, curMouseEvent);
             x = mp.x;
-            y = mp.y
+            y = mp.y;
             xMouseMovement = 0;
             yMouseMovement = 0;
-            let gridSize = 50;
+            var gridSize = 50;
             if (x > player.returnPos().x + gridSize / 2) {
                 key.right = true;
             } else if (x < player.returnPos().x + gridSize / 2) {
@@ -312,7 +312,7 @@ function playGame(smooth) {
                 pathway.setPlayerToObjective();
                 if (36 - pathway.getEmpties().length != walls.length + 1){
                     pathway.getEmpties();
-                    let yeet = 1;
+                    var yeet = 1;
                 }
                 score += 1
                 var newWall;
@@ -321,14 +321,14 @@ function playGame(smooth) {
                 } else {
                     newWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor})
                 }
-                let tempPos = pathway.addRandom('wall')
+                var tempPos = pathway.addRandom('wall')
                 newWall.place(tempPos)
 
                 
-                let options = pathway.getOptions(player.returnPos())
-                let neighbors = []
-                for (let i = 0; i < options.length; i++) {
-                    neighbors.push(options[i].object)
+                var options = pathway.getOptions(player.returnPos());
+                var neighbors = [];
+                for (var i = 0; i < options.length; i++) {
+                    neighbors.push(options[i].object);
                 }
                 while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
                     if (walls.length === size * size - 4) {
@@ -337,35 +337,35 @@ function playGame(smooth) {
                         walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
                         return;
                     }
-                    pathway.removeWalls([tempPos])
-                    tempPos = pathway.addRandom('wall')
-                    newWall.place(tempPos)
-                    options = pathway.getOptions(player.returnPos())
-                    neighbors = []
-                    for (let i = 0; i < options.length; i++) {
-                        neighbors.push(options[i].object)
+                    pathway.removeWalls([tempPos]);
+                    tempPos = pathway.addRandom('wall');
+                    newWall.place(tempPos);
+                    options = pathway.getOptions(player.returnPos());
+                    neighbors = [];
+                    for (var i = 0; i < options.length; i++) {
+                        neighbors.push(options[i].object);
                     }
                 }
                 newWall.place(tempPos);
-                walls.push(newWall)
-                wallPos.push(newWall.returnPos())
+                walls.push(newWall);
+                wallPos.push(newWall.returnPos());
                 if (walls.length >= (size*size-2)) {
                     score += 2;
                     levelUpNoScoreIncrement();
                     return;
                 }
-                let wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
+                var wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
                 score += wallsAddedInUnreachableLocations.length;
-                for (let w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
+                for (var w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
                     var unreachableWall = null;
                     if (level > 3) {
-                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
+                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]});
                     } else {
-                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor})
+                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor});
                     }
-                    unreachableWall.place(wallsAddedInUnreachableLocations[w])
-                    walls.push(unreachableWall)
-                    wallPos.push(unreachableWall.returnPos())
+                    unreachableWall.place(wallsAddedInUnreachableLocations[w]);
+                    walls.push(unreachableWall);
+                    wallPos.push(unreachableWall.returnPos());
                 }
 		console.log("There are " + walls.length + "walls right now");
                 if (walls.length >= (size*size-2)) {
@@ -376,12 +376,12 @@ function playGame(smooth) {
 
                 
                 tempPos = pathway.addRandom('objective');
-                objective.place(tempPos); 
-                resetClock()
+                objective.place(tempPos);
+                resetClock();
             }
         }
     } else {
-        seconds = allowed - milliseconds/1000
+        seconds = allowed - milliseconds/1000;
         if (key.left === true) {
             checkMove("LEFT");
         }
@@ -397,53 +397,53 @@ function playGame(smooth) {
         resetKeys();
         if (doRectsCollide(player.returnRect(), objective.returnRect())) {
             if (walls.length === (size*size-2)) {
-                level += 1
-                pathway.removeWalls(wallPos)
-                walls = addWalls()
-                pathway.addWalls(wallPos)
-                score+=50
+                level += 1;
+                pathway.removeWalls(wallPos);
+                walls = addWalls();
+                pathway.addWalls(wallPos);
+                score+=50;
                 if (lowestTime > size/2-2) {
-                    lowestTime -= 1
+                    lowestTime -= 1;
                 }
-                let tempPos = pathway.addRandom('objective')
+                var tempPos = pathway.addRandom('objective');
                 while (!pathway.isPathway(tempPos)) {
-                    tempPos = pathway.addRandom('objective')
+                    tempPos = pathway.addRandom('objective');
                 }
-                objective.place(tempPos)
-                allowed = size
-                seconds = allowed
+                objective.place(tempPos);
+                allowed = size;
+                seconds = allowed;
                 resetClock()
             } else {
-                score+=1
-                let newWall;
+                score+=1;
+                var newWall;
                 if (level > 3) {
-                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
+                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]});
                 } else {
-                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor})
+                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor});
                 }
-                let tempPos = pathway.addRandom('wall')
-                newWall.place(tempPos)
-                let options = pathway.getOptions(player.returnPos())
-                let neighbors = []
-                for (let i = 0; i < options.length; i ++) {
+                var tempPos = pathway.addRandom('wall');
+                newWall.place(tempPos);
+                var options = pathway.getOptions(player.returnPos());
+                var neighbors = [];
+                for (var i = 0; i < options.length; i ++) {
                     neighbors.push(options[i].object);
                 }
                 while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1)  || doRectsCollide(player.returnRect(), newWall.returnRect())) {
-                    pathway.removeWalls([tempPos])
-                    tempPos = pathway.addRandom('wall')
-                    newWall.place(tempPos)
-                    options = pathway.getOptions(player.returnPos())
-                    neighbors = []
-                    for (let i = 0; i < options.length; i ++) {
-                        neighbors.push(options[i].object)
+                    pathway.removeWalls([tempPos]);
+                    tempPos = pathway.addRandom('wall');
+                    newWall.place(tempPos);
+                    options = pathway.getOptions(player.returnPos());
+                    neighbors = [];
+                    for (var i = 0; i < options.length; i ++) {
+                        neighbors.push(options[i].object);
                     }
                 }
                 newWall.place(tempPos);
-                walls.push(newWall)
-                wallPos.push(newWall.returnPos())
-                tempPos = pathway.addRandom('objective')
-                objective.place(tempPos)
-                resetClock()
+                walls.push(newWall);
+                wallPos.push(newWall.returnPos());
+                tempPos = pathway.addRandom('objective');
+                objective.place(tempPos);
+                resetClock();
             }
         }
     }
@@ -452,25 +452,25 @@ function playGame(smooth) {
 }
 
 function levelUpNoScoreIncrement() {
-    level += 1
-    pathway.removeWalls(wallPos)
-    walls = addWalls()
+    level += 1;
+    pathway.removeWalls(wallPos);
+    walls = addWalls();
     if (lowestTime > size/2-2) {
-        lowestTime -= 1
+        lowestTime -= 1;
     }
-    tempPos = pathway.addRandom('objective')
-    objective.place(tempPos)
-    allowed = size
-    seconds = allowed
-    resetClock()
+    tempPos = pathway.addRandom('objective');
+    objective.place(tempPos);
+    allowed = size;
+    seconds = allowed;
+    resetClock();
 }
 
 function doubleCheckMoves(key) {
-    let originalKey = Object.assign({}, key);
-    let playerOriginalPos = Object.assign({}, player.returnRect());
-    let numMovesUp = checkIndividualMovesUp(key)
+    var originalKey = Object.assign({}, key);
+    var playerOriginalPos = Object.assign({}, player.returnRect());
+    var numMovesUp = checkIndividualMovesUp(key);
     player.place(playerOriginalPos);
-    let numMovesDown = checkIndividualMovesDown(key)
+    var numMovesDown = checkIndividualMovesDown(key);
 
     player.place(playerOriginalPos);
 
@@ -483,7 +483,7 @@ function doubleCheckMoves(key) {
 }
 
 function checkIndividualMovesUp(key) {
-    let numMoves = 0;
+    var numMoves = 0;
     if (key.left === true) {
         if(checkMove("LEFT")) {
             numMoves+=1;
@@ -506,7 +506,7 @@ function checkIndividualMovesUp(key) {
 }
 
 function checkIndividualMovesDown(key) {
-    let numMoves = 0;
+    var numMoves = 0;
     if (key.down === true) {
         if(checkMove("DOWN")) {
             numMoves+=1;
@@ -530,7 +530,7 @@ function checkIndividualMovesDown(key) {
 
 function loseGame(self) {
     if (lost) {
-        lost = false 
+        lost = false;
         playinGame = false;
     }
 }
@@ -541,21 +541,21 @@ function updateClock() {
 
 function setGame() {
     timerInterval = setInterval(updateClock, 100);
-    level = 1
-    score = 0
-    lowestTime = size/2
-    milliseconds = 0
-    allowed = size
-    seconds = allowed
-    pathway = new map({width: size, height: size})
-    player = new playerSquare(playerSymbol)
-    pathway.addPlayer(player.returnPos())
-    wallPos = []
-    walls = addWalls()
-    pathway.addWalls(wallPos)
-    objective = new square(objectiveSymbol)
-    let tempPos = pathway.addRandom('objective')
-    objective.place(tempPos)
+    level = 1;
+    score = 0;
+    lowestTime = size/2;
+    milliseconds = 0;
+    allowed = size;
+    seconds = allowed;
+    pathway = new map({width: size, height: size});
+    player = new playerSquare(playerSymbol);
+    pathway.addPlayer(player.returnPos());
+    wallPos = [];
+    walls = addWalls();
+    pathway.addWalls(wallPos);
+    objective = new square(objectiveSymbol);
+    var tempPos = pathway.addRandom('objective');
+    objective.place(tempPos);
     key = {left: false, right: false, up: false, down: false};
 }
     
@@ -566,20 +566,20 @@ function addWalls() {
     walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
     walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
     walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
-    walls[0].place({x: Math.round(size*50/2-50), y: Math.round(size*50/2-50)})
-    walls[1].place({x: Math.round(size*50/2), y: Math.round(size*50/2-50)})
-    walls[2].place({x: Math.round(size*50/2-50), y: Math.round(size*50/2)})
-    walls[3].place({x: Math.round(size*50/2), y: Math.round(size*50/2)})
-    wallPos.push({x: Math.round(size*50/2-50), y: Math.round(size*50/2-50)})
-    wallPos.push({x: Math.round(size*50/2), y: Math.round(size*50/2-50)})
-    wallPos.push({x: Math.round(size*50/2-50), y: Math.round(size*50/2)})
-    wallPos.push({x: Math.round(size*50/2), y: Math.round(size*50/2)})
+    walls[0].place({x: Math.round(size*50/2-50), y: Math.round(size*50/2-50)});
+    walls[1].place({x: Math.round(size*50/2), y: Math.round(size*50/2-50)});
+    walls[2].place({x: Math.round(size*50/2-50), y: Math.round(size*50/2)});
+    walls[3].place({x: Math.round(size*50/2), y: Math.round(size*50/2)});
+    wallPos.push({x: Math.round(size*50/2-50), y: Math.round(size*50/2-50)});
+    wallPos.push({x: Math.round(size*50/2), y: Math.round(size*50/2-50)});
+    wallPos.push({x: Math.round(size*50/2-50), y: Math.round(size*50/2)});
+    wallPos.push({x: Math.round(size*50/2), y: Math.round(size*50/2)});
     pathway.addWalls(wallPos)
     return walls
 }
 
 function drawBackground() {
-    drawRect({x:0, y:0, width: canvas.width, height: canvas.height, color: bgColor})
+    drawRect({x:0, y:0, width: canvas.width, height: canvas.height, color: bgColor});
 }
 
 function drawAll() {
@@ -588,7 +588,7 @@ function drawAll() {
         drawWalls();
         drawRect(player.returnRect());
         drawRect(objective.returnRect());
-        for (let i = 0; i < walls.length; i++) {
+        for (var i = 0; i < walls.length; i++) {
             drawRect(walls[i].returnRect);
         }
 
@@ -599,7 +599,7 @@ function drawAll() {
         ctx.font = "bold 16px Arial";
         ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
     } else {
-        drawMenu()
+        drawMenu();
     }
     
     
@@ -607,18 +607,18 @@ function drawAll() {
 }
 
 function drawWalls() {
-    for (let i = 0; i < walls.length; i++) {
-        let curRect = walls[i].returnRect();
-        drawRect({x: curRect.x, y: curRect.y, width: curRect.width, height: curRect.height, color: curRect.color})
+    for (var i = 0; i < walls.length; i++) {
+        var curRect = walls[i].returnRect();
+        drawRect({x: curRect.x, y: curRect.y, width: curRect.width, height: curRect.height, color: curRect.color});
     }
 }
 
 function drawMenu() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    drawBackground()
-    drawRect(sixButton)
-    drawRect(tenButton)
-    drawRect(fourteenButton)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+    drawRect(sixButton);
+    drawRect(tenButton);
+    drawRect(fourteenButton);
     drawRect(jsSquare);
     /*if (playSmooth) {
         smoothButton.color = "#00ff00"
@@ -629,14 +629,14 @@ function drawMenu() {
     }*/
     ctx.font = "30px Arial";
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(welcomeMessage, 160, 100); 
+    ctx.fillText(welcomeMessage, 160, 100);
     ctx.fillText(pureJsPureLabel, 185, 170);
 
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000000";
-    ctx.fillText(sixLabel, 83, 255); 
-    ctx.fillText(tenLabel, 223, 255); 
-    ctx.fillText(fourteenLabel, 370, 255); 
+    ctx.fillText(sixLabel, 83, 255);
+    ctx.fillText(tenLabel, 223, 255);
+    ctx.fillText(fourteenLabel, 370, 255);
     //ctx.fillText(smoothLabel, 222, 455);
     ctx.font = "30px Arial";
     ctx.fillText(pureJsJsLabel, 275, 170);
@@ -645,10 +645,10 @@ function drawMenu() {
         
 function resetClock() {
     if (allowed > lowestTime) {
-        allowed -= .5
+        allowed -= .5;
     }
-    seconds = allowed
-    milliseconds = 0
+    seconds = allowed;
+    milliseconds = 0;
 }
 
 function arePositionsEqual(posOne, posTwo) {
@@ -660,15 +660,15 @@ function arePositionsEqual(posOne, posTwo) {
 }
 
 function checkMove(direction) {
-    let originalPos = player.returnPos();
-    let newPos = {x: 0, y: 0}
-    let curPos = player.returnPos()
-    let moduloMoveX = curPos.x;
-    let moduloMoveY = curPos.y
-    let gridSize = 50;
-    newPos.x = curPos.x
-    newPos.y = curPos.y
-    let change = 50
+    var originalPos = player.returnPos();
+    var newPos = {x: 0, y: 0};
+    var curPos = player.returnPos();
+    var moduloMoveX = curPos.x;
+    var moduloMoveY = curPos.y;
+    var gridSize = 50;
+    newPos.x = curPos.x;
+    newPos.y = curPos.y;
+    var change = 50;
     if (playSmooth) {
         change = smoothBasePlayerSpeed;
         if (isMouseDown) {
@@ -676,55 +676,55 @@ function checkMove(direction) {
         }
     }
     if (direction === "LEFT") {
-        newPos.x = curPos.x - change
+        newPos.x = curPos.x - change;
         moduloMoveX = curPos.x - (curPos.x % gridSize);
     } else if (direction === "RIGHT") {
-        newPos.x = curPos.x + change
+        newPos.x = curPos.x + change;
         moduloMoveX = curPos.x + (gridSize - curPos.x % gridSize);
     } else if (direction === "UP") {
-        newPos.y = curPos.y - change
+        newPos.y = curPos.y - change;
         moduloMoveY = curPos.y - (curPos.y % gridSize);
     } else if (direction === "DOWN") {
-        newPos.y = curPos.y + change
+        newPos.y = curPos.y + change;
         moduloMoveY = curPos.y + (gridSize - curPos.y % gridSize);
     }
 
     if (playSmooth) {
-        let firstCheck = newPos;
-        let secondCheck = {x: moduloMoveX, y: moduloMoveY}
-        let modX = newPos.x % gridSize
-        let modY = newPos.y % gridSize
-        let modXDiff = Math.abs(moduloMoveX - curPos.x);
-        let modYDiff = Math.abs(moduloMoveY - curPos.y);
+        var firstCheck = newPos;
+        var secondCheck = {x: moduloMoveX, y: moduloMoveY};
+        var modX = newPos.x % gridSize;
+        var modY = newPos.y % gridSize;
+        var modXDiff = Math.abs(moduloMoveX - curPos.x);
+        var modYDiff = Math.abs(moduloMoveY - curPos.y);
         if (((modX < change || (gridSize - modX > -change)) || (modY < change || (gridSize - modY > -change))) 
         && modXDiff < change && modYDiff < change && (modXDiff !== 0 || modYDiff !== 0)) {
             firstCheck = {x: moduloMoveX, y: moduloMoveY}
             secondCheck = newPos;
         }
-        let smoothMoveAttempt = checkBoundaryAndCollision(curPos, firstCheck);
+        var smoothMoveAttempt = checkBoundaryAndCollision(curPos, firstCheck);
         if (arePositionsEqual(originalPos, player.returnPos())) {
             checkBoundaryAndCollision(curPos, secondCheck);
         }
     } else if (!playSmooth) {
         if(pathway.getObject(newPos) !== 'X') {
-            player.move(newPos)
-            pathway.addPlayer(newPos)
+            player.move(newPos);
+            pathway.addPlayer(newPos);
         }
     }
-    return !arePositionsEqual(originalPos, player.returnPos())
+    return !arePositionsEqual(originalPos, player.returnPos());
 }
 
 function checkBoundaryAndCollision(curPos, newPos) {
     if (newPos.x >= 0 && newPos.x <=size*50-50 && newPos.y >= 0 && newPos.y <=size*50-50) {
-        let collided = false
-        player.move(newPos)
-        for (let i = 0; i < walls.length; i++) {
+        var collided = false;
+        player.move(newPos);
+        for (var i = 0; i < walls.length; i++) {
             if (doRectsCollide(player.returnRect(), walls[i].returnRect())) {
-                collided = true
+                collided = true;
             }
         }
         if(collided) {
-            player.move(curPos)
+            player.move(curPos);
             return false;
         }
         return true;
@@ -732,4 +732,4 @@ function checkBoundaryAndCollision(curPos, newPos) {
     return false;
 }
 
-gameLoop()
+gameLoop();

@@ -5,7 +5,7 @@ class square {
     
     place(position) {
         this.rect.x = position.x;
-        this.rect.y = position.y; 
+        this.rect.y = position.y;
     }
     
     returnPos() {
