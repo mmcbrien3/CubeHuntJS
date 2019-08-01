@@ -57,6 +57,22 @@ class map {
         this.graph[Math.floor(wallPos.y/50)][Math.floor(wallPos.x/50)] = 'X'
     }
 
+    addWallsInUnreachableLocations() {
+        this.removeObjective();
+        let wallsAdded = [];
+        this.empties = this.getEmpties();
+        for (let i = 0; i < this.empties.length; i++) {
+            this.addObjective(this.empties[i]);
+            let isReachable = this.isPathway(this.empties[i]);
+            this.removeObjective();
+            if (!isReachable) {
+                this.addWall(this.empties[i]);
+                wallsAdded.push(this.empties[i])
+            }
+        }
+        return wallsAdded;
+    }
+
     addRandom(objectType) {
         this.removeObjective();
         this.empties = this.getEmpties()
@@ -72,10 +88,6 @@ class map {
                 spot = Math.floor(Math.random() * (this.empties.length))
                 position = this.empties[spot]
                 this.addObjective(position);
-                if (retries >1000) {
-                    let avar=0;
-                    this.getEmpties()
-                }
             }
             
         } else {
@@ -95,6 +107,7 @@ class map {
             return;
         }
         this.graph[Math.floor(this.objectivePos.y/50)][Math.floor(this.objectivePos.x/50)] = '_'
+        this.objectivePos = undefined;
     }
         
     removePeriods() {
@@ -105,6 +118,28 @@ class map {
                 }
             }
         }
+    }
+
+    setPlayerToObjective() {
+        let oPos = this.findItem("O");
+        if (oPos.x === -1) {
+            return;
+        }
+        let pPos = this.findItem("P");
+        this.graph[pPos.y][pPos.x] = "_";
+        this.graph[oPos.y][oPos.x] = "P";
+
+    }
+
+    findItem(item) {
+        for(let i = 0; i < this.size.height; i++) {
+            for(let j = 0; j < this.size.width; j++) {
+                if (this.graph[i][j] === item) {
+                    return {x: j, y: i};
+                }
+            }
+        }
+        return {x: -1, y: -1};
     }
 
     inBounds(position) {
@@ -172,7 +207,8 @@ class map {
         let originalObj = this.objectivePos
         let originalPlayer = this.playerPos
         this.graph[Math.floor(this.playerPos.y/50)][Math.floor(this.playerPos.x/50)] = '_'
-        this.addObjective(oPos)
+        this.removeObjective();
+        this.addObjective(oPos);
         let tempOptions = this.getOptions(this.playerPos)
         this.options = [];
         this.isPathwayBool = false;
@@ -195,6 +231,7 @@ class map {
         }
         this.removePeriods()
         this.addPlayer(originalPlayer)
+        this.removeObjective();
         this.addObjective(originalObj)
         return this.isPathwayBool;
     }

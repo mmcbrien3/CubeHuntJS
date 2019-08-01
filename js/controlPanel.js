@@ -79,7 +79,7 @@ var fourteenLabel = "Massive";
 var smoothLabel = "Smooth";
 var timeLabel = "0.0";
 var scoreLabel = "0";
-var smoothBasePlayerSpeed = 5;
+var smoothBasePlayerSpeed = 10;
 
 setInterval(gameLoop, 10);
 
@@ -297,21 +297,16 @@ function playGame(smooth) {
         resetKeys(isMouseDown);
         pathway.addPlayer(player.returnPos())
         if (doRectsCollide(player.returnRect(), objective.returnRect())) {
-            if (walls.length === (size*size-2)) {
-                level += 1
-                pathway.removeWalls(wallPos)
-                walls = addWalls()
-                score+=50
-                if (lowestTime > size/2-2) {
-                    lowestTime -= 1
-                }
-                tempPos = pathway.addRandom('objective')
-                objective.place(tempPos)
-                allowed = size
-                seconds = allowed
-                resetClock()
+            if (walls.length >= (size*size-2)) {
+                score += 2;
+                levelUpNoScoreIncrement();
             } else {
-                score+=1
+                pathway.setPlayerToObjective();
+                if (36 - pathway.getEmpties().length != walls.length + 1){
+                    pathway.getEmpties();
+                    let yeet = 1;
+                }
+                score += 1
                 var newWall;
                 if (level > 3) {
                     newWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
@@ -320,6 +315,8 @@ function playGame(smooth) {
                 }
                 let tempPos = pathway.addRandom('wall')
                 newWall.place(tempPos)
+
+                
                 let options = pathway.getOptions(player.returnPos())
                 let neighbors = []
                 for (let i = 0; i < options.length; i++) {
@@ -327,7 +324,7 @@ function playGame(smooth) {
                 }
                 while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
                     if (walls.length === size * size - 4) {
-                        score += 2;
+                        score += 1;
                         walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
                         walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
                         return;
@@ -344,6 +341,32 @@ function playGame(smooth) {
                 newWall.place(tempPos);
                 walls.push(newWall)
                 wallPos.push(newWall.returnPos())
+                if (walls.length >= (size*size-2)) {
+                    score += 2;
+                    levelUpNoScoreIncrement();
+                    return;
+                }
+                let wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
+                score += wallsAddedInUnreachableLocations.length;
+                for (let w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
+                    var unreachableWall;
+                    if (level > 3) {
+                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
+                    } else {
+                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor})
+                    }
+                    unreachableWall.place(wallsAddedInUnreachableLocations[w])
+                    walls.push(unreachableWall)
+                    wallPos.push(unreachableWall.returnPos())
+                }
+
+                if (walls.length >= (size*size-2)) {
+                    score += 2;
+                    levelUpNoScoreIncrement();
+                    return;
+                }
+
+                
                 tempPos = pathway.addRandom('objective');
                 objective.place(tempPos); 
                 resetClock()
@@ -418,6 +441,20 @@ function playGame(smooth) {
     }
     timeLabel = (Math.round(seconds * 10) / 10).toString();
     scoreLabel = score.toString();
+}
+
+function levelUpNoScoreIncrement() {
+    level += 1
+    pathway.removeWalls(wallPos)
+    walls = addWalls()
+    if (lowestTime > size/2-2) {
+        lowestTime -= 1
+    }
+    tempPos = pathway.addRandom('objective')
+    objective.place(tempPos)
+    allowed = size
+    seconds = allowed
+    resetClock()
 }
 
 function doubleCheckMoves(key) {
