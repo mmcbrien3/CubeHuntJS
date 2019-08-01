@@ -30,13 +30,18 @@ var playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
 var objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
 
 function resetGame() {
+    playingGame = false;
     level = 1
     score = 0
     lowestTime = size/2
     milliseconds = 0
+    size = 10;
     allowed = size
     seconds = allowed
     pathway = new map({width: size, height: size})
+    playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
+    objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
+ 
     player = new playerSquare(playerSymbol)
     wallPos = []
     walls = addWalls()
@@ -48,7 +53,6 @@ function resetGame() {
     isMouseDown = 0;
     curMouseEvent = null;
     resetScreen();
-    resetClock();
     clearInterval(timerInterval);
     drawAll();
 }
@@ -634,7 +638,6 @@ function drawMenu() {
 
         
 function resetClock() {
-    milliseconds = 0;
     if (allowed > lowestTime) {
         allowed -= .5
     }
