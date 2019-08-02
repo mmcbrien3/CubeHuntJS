@@ -14,6 +14,7 @@ document.addEventListener("keyup", handleGameKeysUp, false);
 var size = 10;
 var key = {left: false, right: false, up: false, down: false};
 var playingGame = false;
+var showingHighScores = false;
 var playSmooth = true;
 
 var wallColor = "#C69354";
@@ -24,15 +25,28 @@ var rainbowColors = ["#F49AC2","#AEC6CF","#77BE77","#CFCFC4","#FDFD96","#826953"
 var sixButton = {x: 50, y: 225, width: 100, height: 50, color: "#C69354"};
 var tenButton = {x: 200, y: 225, width: 100, height: 50, color: "#C69354"};
 var fourteenButton = {x: 350, y: 225, width: 100, height: 50, color: "#C69354"};
-var smoothButton = {x: 200, y: 425, width: 100, height: 50, color: "#00FF00"};
+var hsButton = {x: 200, y: 425, width: 100, height: 50, color: "#008800"};
 var jsSquare = {x: 260, y: 125, width: 50, height: 50, color: "#F1DA4E"};
 
 var playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
 var objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
+var cachedScores = {};
+var enteringHighScore = false;
+var validatedToken = "";
+var highScoreName = "";
+var highScoreAchieved = false;
+var justLost = true;
 
 function resetGame() {
     playingGame = false;
+    enteringHighScore = false;
+    highScoreAchieved = false;
+    justLost = true;
+    validatedToken = "";
+    highScoreName = "";
+    showingHighScores = false;
     level = 1;
+    lost = false;
     score = 0;
     lowestTime = size/2;
     milliseconds = 0;
@@ -93,11 +107,19 @@ setInterval(gameLoop, 10);
 
 function gameLoop() {
     if (playingGame) {
-        if (seconds > 0) {
-            lost = true;
+        if (seconds >= 0) {
             playGame(playSmooth)
         } else {
-            loseGame();
+            if (justLost) {
+                drawWalls()                
+                timeLabel = 0.0
+                ctx.fillStyle = "#000000";
+                ctx.font = "16px Arial";
+                ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
+                ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
+                highScoreAchieved = checkForHighScore(score, size);
+            }
+            justLost = false;
         }
     } else {
 
@@ -179,8 +201,9 @@ function handleMenuClicks(event) {
         canvas.height = 700;
         setGame();
     }
-    else if (checkClickInRect(x, y, smoothButton)) {
-        //playSmooth = !playSmooth;
+    else if (checkClickInRect(x, y, hsButton)) {
+        cachedScores = getAllTimeScores()
+        showingHighScores = true;
     }
 }
 
@@ -190,6 +213,22 @@ function resetScreen() {
 }
 
 function handleGameKeysDown(e) {
+    if (enteringHighScore) {
+        if (e.keyCode === 13) {
+            if (highScoreName.length > 20) {
+                highScoreName.substring(0, 19);
+            }
+            submitHighScore(score, highScoreName, size, validatedToken);
+            resetGame();
+        } else if (e.keyCode == 37 && highScoreName.length > 0) {
+            highScoreName = highScoreName.substring(0, highScoreName.length - 1);
+        } else if((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90)) {
+            if (highScoreName.length === 20) { return; }
+            highScoreName += e.key;
+
+        }
+        return;
+    }
     if (e.keyCode === 27) {
         playingGame = false;
         resetGame();
@@ -367,7 +406,6 @@ function playGame(smooth) {
                     walls.push(unreachableWall);
                     wallPos.push(unreachableWall.returnPos());
                 }
-		console.log("There are " + walls.length + "walls right now");
                 if (walls.length >= (size*size-2)) {
                     score += 2;
                     levelUpNoScoreIncrement();
@@ -528,11 +566,55 @@ function checkIndividualMovesDown(key) {
     return numMoves;
 }
 
-function loseGame(self) {
-    if (lost) {
-        lost = false;
-        playinGame = false;
+function loseGame() {
+
+    
+}
+
+function drawLoserEntry() {
+
+    var loserLabel = "No high score."
+    var escLabel = "Press 'esc' to restart";
+    var loserRect = {x: 0, y: 0, width: 150, height: 100, color: "#ff0000"}; 
+    drawRect(loserRect);
+    ctx.fillStyle = "#000000";
+    ctx.font = "12px Arial";
+    ctx.fillText(loserLabel, 15, 15);
+    ctx.fillText(escLabel, 15, 35);
+
+}
+
+function checkForHighScore(score, size) {
+    validatedToken = submitState(pathway.graph.join(" "), score);
+    cachedScores = getAllTimeScores();
+    var scoresWeCareAbout;
+    if (size == 6) {
+        scoresWeCareAbout = cachedScores.mini
+    } else if (size == 10) {
+        scoresWeCareAbout = cachedScores.normal
+    } else if (size == 14) {
+        scoresWeCareAbout = cachedScores.massive
     }
+    if (scoresWeCareAbout.length < 10) {
+        return true;
+    }
+    if (score > scoresWeCareAbout[scoresWeCareAbout.length - 1]) {
+        return true;
+    }
+    return false;
+
+}
+
+function submitState(st, sc) {
+    var validationUrl="https://gczjty0d8g.execute-api.us-east-2.amazonaws.com/prod/validation";
+    var dataToSubmit = {state: st, score: sc.toString()}
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "PUT", validationUrl, false ); // false for synchronous request
+    xmlHttp.send(JSON.stringify(dataToSubmit));
+    var resp = xmlHttp.responseText
+    
+    return resp;
+
 }
 
 function updateClock() {
@@ -584,26 +666,61 @@ function drawBackground() {
 
 function drawAll() {
     if (playingGame) {
-        drawBackground();
-        drawWalls();
-        drawRect(player.returnRect());
-        drawRect(objective.returnRect());
-        for (var i = 0; i < walls.length; i++) {
-            drawRect(walls[i].returnRect);
+
+        if (seconds > 0) {
+            drawBackground();
+
+            drawWalls();
+            drawRect(player.returnRect());
+            drawRect(objective.returnRect());
+            for (var i = 0; i < walls.length; i++) {
+                drawRect(walls[i].returnRect);
+            }
+
+            ctx.fillStyle = "#000000";
+            ctx.font = "16px Arial";
+            ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 16px Arial";
+            ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
+        } else {
+            if (highScoreAchieved) {
+                drawHighScoreEntry();
+            } else {
+                drawLoserEntry();
+            }
         }
-
-        ctx.fillStyle = "#000000";
-        ctx.font = "16px Arial";
-        ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
-        ctx.fillStyle = "#000000";
-        ctx.font = "bold 16px Arial";
-        ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
     } else {
-        drawMenu();
-    }
-    
-    
+        if (!showingHighScores){
+            drawMenu();
+        } else {
+            drawHighScores();
+        }
+    } 
 
+}
+
+function submitHighScore(sc, n, si, t) {
+    var scoresUrl="https://gczjty0d8g.execute-api.us-east-2.amazonaws.com/prod/scores"
+    var dataToSubmit = {score: sc.toString(), name: n, size: si.toString(), token: t}
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "PUT", scoresUrl, true ); // false for synchronous request
+    xmlHttp.send(JSON.stringify(dataToSubmit));
+}
+
+function drawHighScoreEntry() {
+    enteringHighScore = true;
+    var winner = "HIGH SCORE!";
+    var escLabel = "Press 'enter' to restart";
+    var instLabel = "<-- for backspace"
+    loserRect = {x: 0, y: 0, width: 150, height: 100, color: "#00ff00"}; 
+    drawRect(loserRect);
+    ctx.fillStyle = "#000000";
+    ctx.font = "12px Arial";
+    ctx.fillText(winner, 15, 15);
+    ctx.fillText(escLabel, 15, 35);
+    ctx.fillText(instLabel, 15, 55);
+    ctx.fillText(highScoreName, 15, 75); 
 }
 
 function drawWalls() {
@@ -620,26 +737,69 @@ function drawMenu() {
     drawRect(tenButton);
     drawRect(fourteenButton);
     drawRect(jsSquare);
-    /*if (playSmooth) {
-        smoothButton.color = "#00ff00"
-        drawRect(smoothButton)
-    } else {
-        smoothButton.color = "#ff0000"
-        drawRect(smoothButton)
-    }*/
+    drawRect(hsButton);
     ctx.font = "30px Arial";
     ctx.fillStyle = "#ffffff";
     ctx.fillText(welcomeMessage, 160, 100);
     ctx.fillText(pureJsPureLabel, 185, 170);
-
     ctx.font = "16px Arial";
     ctx.fillStyle = "#000000";
+
+    ctx.fillText("High Scores", 207, 455);
+
     ctx.fillText(sixLabel, 83, 255);
     ctx.fillText(tenLabel, 223, 255);
     ctx.fillText(fourteenLabel, 370, 255);
     //ctx.fillText(smoothLabel, 222, 455);
     ctx.font = "30px Arial";
     ctx.fillText(pureJsJsLabel, 275, 170);
+}
+
+function drawHighScores() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+    var miniScores = cachedScores.mini;
+    var normalScores = cachedScores.normal;
+    var massiveScores = cachedScores.massive;
+    console.log("M " + miniScores)
+    drawScoresInColumn(miniScores, "MINI", 25);
+    drawScoresInColumn(normalScores, "NORMAL", 195);
+    drawScoresInColumn(massiveScores, "MASSIVE", 375);
+}
+
+function drawScoresInColumn(scores, topLabel, xPosition) {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(topLabel, xPosition, 20)
+    for (var i = 0; i < scores.length && i <= 10; i += 1) {
+        ctx.fillText((i+1).toString() + ") " + scores[i].name + ": " + scores[i].score, xPosition, 20 * (i + 2));
+    }
+}
+
+function getAllTimeScores() {
+    var scoresUrl="https://gczjty0d8g.execute-api.us-east-2.amazonaws.com/prod/scores";
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", scoresUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    var resp = xmlHttp.responseText
+    
+    resp = resp.replace(/'/g, '"')
+    console.log(resp);
+    scoreResponse = JSON.parse(resp);
+    var scores = {mini: [], normal: [], massive: []};
+    for (var i = 0; i < scoreResponse.length; i++) {
+        if (scoreResponse[i].size === "6") {
+            scores.mini.push({score: scoreResponse[i].score, name: scoreResponse[i].name})
+        } else if (scoreResponse[i].size === "10") {
+            scores.normal.push({score: scoreResponse[i].score, name: scoreResponse[i].name})
+        } else if (scoreResponse[i].size === "14") {
+            scores.massive.push({score: scoreResponse[i].score, name: scoreResponse[i].name})
+        }
+    }
+    scores.mini.sort((a, b) => (a.score < b.score) ? 1 : -1)
+    scores.normal.sort((a, b) => (a.score < b.score) ? 1 : -1)
+    scores.massive.sort((a, b) => (a.score < b.score) ? 1 : -1)
+    return scores;
 }
 
         
