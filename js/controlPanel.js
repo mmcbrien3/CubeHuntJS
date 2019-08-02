@@ -91,24 +91,29 @@ var xMouseMovement = 0;
 var yMouseMovement = 0;
 var isMouseDown = 0;
 var curMouseEvent = null;
+var lost = false;
 
-var welcomeMessage = "CUBE HUNT";
-var sixLabel = "Mini";
-var tenLabel = "Normal";
-var fourteenLabel = "Massive";
-var smoothLabel = "Smooth";
-var pureJsPureLabel = "Pure";
-var pureJsJsLabel = "JS";
+const welcomeMessage = "CUBE HUNT";
+const sixLabel = "Mini";
+const tenLabel = "Normal";
+const fourteenLabel = "Massive";
+const smoothLabel = "Smooth";
+const pureJsPureLabel = "Pure";
+const pureJsJsLabel = "JS";
 var timeLabel = "0.0";
 var scoreLabel = "0";
-var smoothBasePlayerSpeed = 6;
+const smoothBasePlayerSpeed = 6;
 
 setInterval(gameLoop, 10);
 
 function gameLoop() {
     if (playingGame) {
-        if (seconds >= 0) {
-            playGame(playSmooth)
+        if (!lost) {
+        	if (seconds <= 0) { 
+        		lost = true; 
+        	} else {
+            	playGame(playSmooth)
+            }
         } else {
             if (justLost) {
                 drawWalls()                
@@ -393,6 +398,7 @@ function playGame(smooth) {
                     levelUpNoScoreIncrement();
                     return;
                 }
+                //TODO: unreachable locations has very rare bug where block isn't placed, causes infinite loop
                 var wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
                 score += wallsAddedInUnreachableLocations.length;
                 for (var w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
@@ -667,7 +673,7 @@ function drawBackground() {
 function drawAll() {
     if (playingGame) {
 
-        if (seconds > 0) {
+        if (!lost) {
             drawBackground();
 
             drawWalls();
