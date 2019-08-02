@@ -109,7 +109,7 @@ class map {
             return;
         }
         this.graph[Math.floor(this.objectivePos.y/50)][Math.floor(this.objectivePos.x/50)] = '_';
-        this.objectivePos = undefined;
+        //this.objectivePos = undefined;
     }
         
     removePeriods() {
