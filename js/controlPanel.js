@@ -117,7 +117,7 @@ function gameLoop() {
                 ctx.font = "16px Arial";
                 ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
                 ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
-                highScoreAchieved = checkForHighScore(score, size);
+                highScoreAchieved = checkForHighScore(cachedHighScores, score, size);
             }
             justLost = false;
         }
@@ -796,9 +796,9 @@ function getAllTimeScores() {
             scores.massive.push({score: scoreResponse[i].score, name: scoreResponse[i].name})
         }
     }
-    scores.mini.sort((a, b) => (a.score < b.score) ? 1 : -1)
-    scores.normal.sort((a, b) => (a.score < b.score) ? 1 : -1)
-    scores.massive.sort((a, b) => (a.score < b.score) ? 1 : -1)
+    scores.mini.sort((a, b) => (parseInt(a.score) < parseInt(b.score)) ? 1 : -1)
+    scores.normal.sort((a, b) => (parseInt(a.score) < parseInt(b.score)) ? 1 : -1)
+    scores.massive.sort((a, b) => (parseInt(a.score) < parseInt(b.score)) ? 1 : -1)
     return scores;
 }
 
