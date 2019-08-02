@@ -117,7 +117,7 @@ function gameLoop() {
                 ctx.font = "16px Arial";
                 ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
                 ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
-                highScoreAchieved = checkForHighScore(cachedHighScores, score, size);
+                highScoreAchieved = checkForHighScore(score, size);
             }
             justLost = false;
         }
@@ -598,7 +598,7 @@ function checkForHighScore(score, size) {
     if (scoresWeCareAbout.length < 10) {
         return true;
     }
-    if (score > scoresWeCareAbout[scoresWeCareAbout.length - 1]) {
+    if (score > parseInt(scoresWeCareAbout[scoresWeCareAbout.length - 1].score)) {
         return true;
     }
     return false;
