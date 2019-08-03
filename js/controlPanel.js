@@ -617,7 +617,7 @@ function checkForHighScore(score, size) {
 	highScoreDetermined = true;
         return true;
     }
-    if (score > parseInt(scoresWeCareAbout[scoresWeCareAbout.length - 1].score)) {
+    if (score > parseInt(scoresWeCareAbout[9].score)) {
         highScoreDetermined = true;
         return true;
     }
@@ -792,7 +792,7 @@ function drawScoresInColumn(scores, topLabel, xPosition) {
     ctx.font = "16px Arial";
     ctx.fillStyle = "#ffffff";
     ctx.fillText(topLabel, xPosition, 20)
-    for (var i = 0; i < scores.length && i <= 10; i += 1) {
+    for (var i = 0; i < scores.length && i < 10; i += 1) {
         ctx.fillText((i+1).toString() + ") " + scores[i].name + ": " + scores[i].score, xPosition, 20 * (i + 2));
     }
 }
