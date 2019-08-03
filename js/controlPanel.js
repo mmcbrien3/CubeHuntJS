@@ -35,12 +35,14 @@ var enteringHighScore = false;
 var validatedToken = "";
 var highScoreName = "";
 var highScoreAchieved = false;
+var highScoreDetermined = false;
 var justLost = true;
 
 function resetGame() {
     playingGame = false;
     enteringHighScore = false;
     highScoreAchieved = false;
+    highScoreDetermined = false;
     justLost = true;
     validatedToken = "";
     highScoreName = "";
@@ -51,7 +53,7 @@ function resetGame() {
     lowestTime = size/2;
     milliseconds = 0;
     size = 10;
-    allowed = size;
+    allowed = getMaxTimeBasedOnSize(size);
     seconds = allowed;
     pathway = new map({width: size, height: size});
     playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
@@ -72,13 +74,23 @@ function resetGame() {
     drawAll();
 }
 
+function getMaxTimeBasedOnSize(size) {
+    if (size === 6) {
+        return 6;
+    } else if (size === 10) {
+        return 7;
+    } else if (size === 14) {
+	return 8;
+    }
+}
+
 var timerInterval;
 var level = 1;
 
 var score = 0;
 var lowestTime = size/2;
 var milliseconds = 0;
-var allowed = size;
+var allowed = getMaxTimeBasedOnSize(size);
 var seconds = allowed;
 var pathway = new map({width: size, height: size});
 var player = new playerSquare(playerSymbol);
@@ -454,7 +466,7 @@ function playGame(smooth) {
                     tempPos = pathway.addRandom('objective');
                 }
                 objective.place(tempPos);
-                allowed = size;
+		allowed = getMaxTimeBasedOnSize(size);
                 seconds = allowed;
                 resetClock()
             } else {
@@ -504,7 +516,7 @@ function levelUpNoScoreIncrement() {
     }
     tempPos = pathway.addRandom('objective');
     objective.place(tempPos);
-    allowed = size;
+    allowed = getMaxTimeBasedOnSize(size);
     seconds = allowed;
     resetClock();
 }
@@ -602,11 +614,14 @@ function checkForHighScore(score, size) {
         scoresWeCareAbout = cachedScores.massive
     }
     if (scoresWeCareAbout.length < 10) {
+	highScoreDetermined = true;
         return true;
     }
     if (score > parseInt(scoresWeCareAbout[scoresWeCareAbout.length - 1].score)) {
+        highScoreDetermined = true;
         return true;
     }
+    highScoreDetermined = true;
     return false;
 
 }
@@ -633,7 +648,7 @@ function setGame() {
     score = 0;
     lowestTime = size/2;
     milliseconds = 0;
-    allowed = size;
+    allowed = getMaxTimeBasedOnSize(size);
     seconds = allowed;
     pathway = new map({width: size, height: size});
     player = new playerSquare(playerSymbol);
@@ -692,7 +707,7 @@ function drawAll() {
         } else {
             if (highScoreAchieved) {
                 drawHighScoreEntry();
-            } else {
+            } else if (highScoreDetermined) {
                 drawLoserEntry();
             }
         }
