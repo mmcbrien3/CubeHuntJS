@@ -344,11 +344,11 @@ function getMaxDistanceBySize() {
 
 function getMinTimeBasedOnSize(size) {
     if (size === 6) {
-        return 1.5;
+        return 1.00;
     } else if (size === 10) {
-        return 1.75;
+        return 1.33;
     } else if (size === 14) {
-        return 2.0;
+        return 1.66;
     }
 }
 
@@ -392,7 +392,7 @@ function playGame(smooth) {
     resetKeys(isMouseDown);
     pathway.addPlayer(player.returnPos())
     if (doRectsCollide(player.returnRect(), objective.returnRect())) {
-        if (walls.length >= (size*size-2)) {
+        if (walls.length === (size*size-2)) {
             score += 2;
             levelUpNoScoreIncrement();
         } else {
@@ -401,7 +401,6 @@ function playGame(smooth) {
                 pathway.getEmpties();
                 var yeet = 1;
             }
-            score += 1
             var newWall;
             if (level > 3) {
                 newWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
@@ -417,9 +416,10 @@ function playGame(smooth) {
             for (var i = 0; i < options.length; i++) {
                 neighbors.push(options[i].object);
             }
+            //TODO: there is sometimes a glitch in score (e.g. giving 33pts/clear on mini instead of 32)
             while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
                 if (walls.length === size * size - 4) {
-                    score += 1;
+                    score += 4;
                     levelUpNoScoreIncrement();
                     return;
                 }
@@ -435,14 +435,14 @@ function playGame(smooth) {
             newWall.place(tempPos);
             walls.push(newWall);
             wallPos.push(newWall.returnPos());
-            if (walls.length >= (size*size-2)) {
+            score += 1;  
+            if (walls.length === (size*size-2)) {
                 score += 2;
                 levelUpNoScoreIncrement();
                 return;
             }
             //TODO: unreachable locations has very rare bug where block isn't placed, causes infinite loop
             var wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
-            score += wallsAddedInUnreachableLocations.length;
             for (var w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
                 var unreachableWall = null;
                 if (level > 3) {
@@ -453,9 +453,17 @@ function playGame(smooth) {
                 unreachableWall.place(wallsAddedInUnreachableLocations[w]);
                 walls.push(unreachableWall);
                 wallPos.push(unreachableWall.returnPos());
+                if (walls.length === (size*size-2)) {
+                    score += 3;
+                    levelUpNoScoreIncrement();
+                    return;
+                } else {
+                    score += 1;
+                }
             }
-            if (walls.length >= (size*size-2)) {
-                score += 2;
+            
+
+            if (walls.length > (size*size-2)) {
                 levelUpNoScoreIncrement();
                 return;
             }
@@ -474,8 +482,8 @@ function levelUpNoScoreIncrement() {
     level += 1;
     pathway.removeWalls(wallPos);
     walls = addWalls();
-    if (lowestTime >= getMinTimeBasedOnSize(size)) {
-        lowestTime -= 0.5;
+    if (lowestTime - 1.0 >= getMinTimeBasedOnSize(size)) {
+        lowestTime -= 1.0
     } else {
         lowestTime = getMinTimeBasedOnSize(size);
     }
@@ -830,7 +838,7 @@ function getAllTimeScores() {
 
         
 function resetClock() {
-    var decrement = 0.5;
+    var decrement = size / 6;
     if (allowed - decrement >= lowestTime) {
         allowed -= decrement;
     } else {
