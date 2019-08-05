@@ -78,9 +78,9 @@ function getMaxTimeBasedOnSize(size) {
     if (size === 6) {
         return 6;
     } else if (size === 10) {
-        return 7;
+        return 6.25;
     } else if (size === 14) {
-	return 8;
+	return 6.5;
     }
 }
 
@@ -709,6 +709,8 @@ function drawAll() {
                 drawHighScoreEntry();
             } else if (highScoreDetermined) {
                 drawLoserEntry();
+            } else {
+                drawDeterminingHighScore();
             }
         }
     } else {
@@ -742,6 +744,18 @@ function drawHighScoreEntry() {
     ctx.fillText(escLabel, 15, 35);
     ctx.fillText(instLabel, 15, 55);
     ctx.fillText(highScoreName, 15, 75); 
+}
+
+function drawDeterminingHighScore() {
+    var waitingLabel = "Checking for high score...";
+    var escLabel = "Press 'esc' to restart now";
+    determiningRect = {x: 0, y: 0, width: 150, height: 100, color: "#666666"}; 
+    drawRect(determiningRect);
+    ctx.fillStyle = "#000000";
+    ctx.font = "12px Arial";
+    ctx.fillText(waitingLabel, 15, 15);
+    ctx.fillText(escLabel, 15, 35);
+
 }
 
 function drawWalls() {
