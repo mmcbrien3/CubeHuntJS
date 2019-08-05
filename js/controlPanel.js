@@ -58,7 +58,7 @@ function resetGame() {
     level = 1;
     lost = false;
     score = 0;
-    lowestTime = size/2;
+    lowestTime = getStartingMinTimeBasedOnSize(size);
     milliseconds = 0;
     size = 10;
     allowed = getMaxTimeBasedOnSize(size);
@@ -96,12 +96,20 @@ function getMaxTimeBasedOnSize(size) {
 	   return 6.5;
     }
 }
-
+function getStartingMinTimeBasedOnSize(size) {
+    if (size === 6) {
+        return 3;
+    } else if (size === 10) {
+        return 3.25;
+    } else if (size === 14) {
+       return 3.5;
+    }
+}
 var timerInterval;
 var level = 1;
 
 var score = 0;
-var lowestTime = size/2;
+var lowestTime = getStartingMinTimeBasedOnSize(size);
 var milliseconds = 0;
 var allowed = getMaxTimeBasedOnSize(size);
 var seconds = allowed;
@@ -336,11 +344,11 @@ function getMaxDistanceBySize() {
 
 function getMinTimeBasedOnSize(size) {
     if (size === 6) {
-        return 2;
+        return 1.5;
     } else if (size === 10) {
-        return 2.25;
+        return 1.75;
     } else if (size === 14) {
-        return 2.5;
+        return 2.0;
     }
 }
 
@@ -360,7 +368,7 @@ function getMousePlayerSpeed() {
 }
 
 function playGame(smooth) {
-    seconds = allowed //- milliseconds/1000;
+    seconds = allowed - milliseconds/1000;
     if (isMouseDown) {
         mp = getMousePos(canvas, curMouseEvent);
         x = mp.x;
@@ -412,8 +420,7 @@ function playGame(smooth) {
             while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
                 if (walls.length === size * size - 4) {
                     score += 1;
-                    walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
-                    walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
+                    levelUpNoScoreIncrement();
                     return;
                 }
                 pathway.removeWalls([tempPos]);
@@ -468,7 +475,7 @@ function levelUpNoScoreIncrement() {
     pathway.removeWalls(wallPos);
     walls = addWalls();
     if (lowestTime >= getMinTimeBasedOnSize(size)) {
-        lowestTime -= 1;
+        lowestTime -= 0.5;
     } else {
         lowestTime = getMinTimeBasedOnSize(size);
     }
@@ -604,7 +611,7 @@ function setGame() {
     timerInterval = setInterval(updateClock, 100);
     level = 1;
     score = 0;
-    lowestTime = size/2;
+    lowestTime = getStartingMinTimeBasedOnSize(size);
     milliseconds = 0;
     allowed = getMaxTimeBasedOnSize(size);
     seconds = allowed;
