@@ -30,6 +30,13 @@ var jsSquare = {x: 260, y: 125, width: 50, height: 50, color: "#F1DA4E"};
 
 var playerSymbol = {x: 50, y: 50, width: 50, height: 50, color: "#FFFFFF"};
 var objectiveSymbol = {x: 350, y: 50, width: 50, height: 50, color: "#FF0000"};
+
+var playerMenuRect = {x: 50, y: 325, width: 50, height: 50, color: "#FFFFFF"};
+var objectiveMenuRect = {x: 400, y: 325, width: 50, height: 50, color: "#ff0000"};
+var playerMenu = new playerSquare(playerMenuRect);
+var objectiveMenu = new square(objectiveMenuRect);
+var menuSpeed = 2;
+
 var cachedScores = {};
 var enteringHighScore = false;
 var validatedToken = "";
@@ -39,6 +46,7 @@ var highScoreDetermined = false;
 var justLost = true;
 
 function resetGame() {
+    menuSpeed = 2;
     playingGame = false;
     enteringHighScore = false;
     highScoreAchieved = false;
@@ -65,6 +73,11 @@ function resetGame() {
     pathway.addWalls(wallPos);
     objective = new square(objectiveSymbol);
 
+    playerMenuRect = {x: 50, y: 325, width: 50, height: 50, color: "#FFFFFF"};
+    objectiveMenuRect = {x: 400, y: 325, width: 50, height: 50, color: "#ff0000"};
+    playerMenu = new playerSquare(playerMenuRect);
+    objectiveMenu = new square(objectiveMenuRect);
+
     xMouseMovement = 0;
     yMouseMovement = 0;
     isMouseDown = 0;
@@ -80,7 +93,7 @@ function getMaxTimeBasedOnSize(size) {
     } else if (size === 10) {
         return 6.25;
     } else if (size === 14) {
-	return 6.5;
+	   return 6.5;
     }
 }
 
@@ -134,6 +147,7 @@ function gameLoop() {
                 ctx.font = "16px Arial";
                 ctx.fillText(timeLabel, (canvas.width / 2) - 10, (canvas.height / 2) - 10);
                 ctx.fillText(scoreLabel, (canvas.width / 2) - 10, (canvas.height / 2) + 10);
+                drawDeterminingHighScore();
                 highScoreAchieved = checkForHighScore(score, size);
             }
             justLost = false;
@@ -320,6 +334,16 @@ function getMaxDistanceBySize() {
     return Math.sqrt(Math.pow(canvas.width, 2) + Math.pow(canvas.height, 2));
 }
 
+function getMinTimeBasedOnSize(size) {
+    if (size === 6) {
+        return 2;
+    } else if (size === 10) {
+        return 2.25;
+    } else if (size === 14) {
+        return 2.5;
+    }
+}
+
 function getMousePlayerSpeed() {
     var distance = getDistTweenMouseAndPlayer(getMousePos(canvas, curMouseEvent), player.returnPos());
     var minSpeed = 3;
@@ -336,171 +360,103 @@ function getMousePlayerSpeed() {
 }
 
 function playGame(smooth) {
-    if (smooth) {
-        seconds = allowed - milliseconds/1000;
-        if (isMouseDown) {
-            mp = getMousePos(canvas, curMouseEvent);
-            x = mp.x;
-            y = mp.y;
-            xMouseMovement = 0;
-            yMouseMovement = 0;
-            var gridSize = 50;
-            if (x > player.returnPos().x + gridSize / 2) {
-                key.right = true;
-            } else if (x < player.returnPos().x + gridSize / 2) {
-                key.left = true;
-            }
-            if (y > player.returnPos().y + gridSize / 2) {
-                key.down = true;
-            } else if (y < player.returnPos().y + gridSize / 2){
-                key.up = true;
-            }
+    seconds = allowed //- milliseconds/1000;
+    if (isMouseDown) {
+        mp = getMousePos(canvas, curMouseEvent);
+        x = mp.x;
+        y = mp.y;
+        xMouseMovement = 0;
+        yMouseMovement = 0;
+        var gridSize = 50;
+        if (x > player.returnPos().x + gridSize / 2) {
+            key.right = true;
+        } else if (x < player.returnPos().x + gridSize / 2) {
+            key.left = true;
         }
-        key = doubleCheckMoves(key)
-        
-        resetKeys(isMouseDown);
-        pathway.addPlayer(player.returnPos())
-        if (doRectsCollide(player.returnRect(), objective.returnRect())) {
-            if (walls.length >= (size*size-2)) {
-                score += 2;
-                levelUpNoScoreIncrement();
+        if (y > player.returnPos().y + gridSize / 2) {
+            key.down = true;
+        } else if (y < player.returnPos().y + gridSize / 2){
+            key.up = true;
+        }
+    }
+    key = doubleCheckMoves(key)
+    
+    resetKeys(isMouseDown);
+    pathway.addPlayer(player.returnPos())
+    if (doRectsCollide(player.returnRect(), objective.returnRect())) {
+        if (walls.length >= (size*size-2)) {
+            score += 2;
+            levelUpNoScoreIncrement();
+        } else {
+            pathway.setPlayerToObjective();
+            if (36 - pathway.getEmpties().length != walls.length + 1){
+                pathway.getEmpties();
+                var yeet = 1;
+            }
+            score += 1
+            var newWall;
+            if (level > 3) {
+                newWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
             } else {
-                pathway.setPlayerToObjective();
-                if (36 - pathway.getEmpties().length != walls.length + 1){
-                    pathway.getEmpties();
-                    var yeet = 1;
-                }
-                score += 1
-                var newWall;
-                if (level > 3) {
-                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]})
-                } else {
-                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor})
-                }
-                var tempPos = pathway.addRandom('wall')
-                newWall.place(tempPos)
+                newWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor})
+            }
+            var tempPos = pathway.addRandom('wall')
+            newWall.place(tempPos)
 
-                
-                var options = pathway.getOptions(player.returnPos());
-                var neighbors = [];
+            
+            var options = pathway.getOptions(player.returnPos());
+            var neighbors = [];
+            for (var i = 0; i < options.length; i++) {
+                neighbors.push(options[i].object);
+            }
+            while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
+                if (walls.length === size * size - 4) {
+                    score += 1;
+                    walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
+                    walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
+                    return;
+                }
+                pathway.removeWalls([tempPos]);
+                tempPos = pathway.addRandom('wall');
+                newWall.place(tempPos);
+                options = pathway.getOptions(player.returnPos());
+                neighbors = [];
                 for (var i = 0; i < options.length; i++) {
                     neighbors.push(options[i].object);
                 }
-                while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
-                    if (walls.length === size * size - 4) {
-                        score += 1;
-                        walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
-                        walls.push(new square({x: -50, y: -50, width: 50, height: 50, color: wallColor}));
-                        return;
-                    }
-                    pathway.removeWalls([tempPos]);
-                    tempPos = pathway.addRandom('wall');
-                    newWall.place(tempPos);
-                    options = pathway.getOptions(player.returnPos());
-                    neighbors = [];
-                    for (var i = 0; i < options.length; i++) {
-                        neighbors.push(options[i].object);
-                    }
-                }
-                newWall.place(tempPos);
-                walls.push(newWall);
-                wallPos.push(newWall.returnPos());
-                if (walls.length >= (size*size-2)) {
-                    score += 2;
-                    levelUpNoScoreIncrement();
-                    return;
-                }
-                //TODO: unreachable locations has very rare bug where block isn't placed, causes infinite loop
-                var wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
-                score += wallsAddedInUnreachableLocations.length;
-                for (var w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
-                    var unreachableWall = null;
-                    if (level > 3) {
-                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]});
-                    } else {
-                        unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor});
-                    }
-                    unreachableWall.place(wallsAddedInUnreachableLocations[w]);
-                    walls.push(unreachableWall);
-                    wallPos.push(unreachableWall.returnPos());
-                }
-                if (walls.length >= (size*size-2)) {
-                    score += 2;
-                    levelUpNoScoreIncrement();
-                    return;
-                }
-
-                
-                tempPos = pathway.addRandom('objective');
-                objective.place(tempPos);
-                resetClock();
             }
-        }
-    } else {
-        seconds = allowed - milliseconds/1000;
-        if (key.left === true) {
-            checkMove("LEFT");
-        }
-        else if (key.right === true) {
-            checkMove("RIGHT");
-        }
-        else if (key.up === true) {
-            checkMove("UP");
-        }
-        else if (key.down === true) {
-            checkMove("DOWN");
-        }
-        resetKeys();
-        if (doRectsCollide(player.returnRect(), objective.returnRect())) {
-            if (walls.length === (size*size-2)) {
-                level += 1;
-                pathway.removeWalls(wallPos);
-                walls = addWalls();
-                pathway.addWalls(wallPos);
-                score+=50;
-                if (lowestTime > size/2-2) {
-                    lowestTime -= 1;
-                }
-                var tempPos = pathway.addRandom('objective');
-                while (!pathway.isPathway(tempPos)) {
-                    tempPos = pathway.addRandom('objective');
-                }
-                objective.place(tempPos);
-		allowed = getMaxTimeBasedOnSize(size);
-                seconds = allowed;
-                resetClock()
-            } else {
-                score+=1;
-                var newWall;
+            newWall.place(tempPos);
+            walls.push(newWall);
+            wallPos.push(newWall.returnPos());
+            if (walls.length >= (size*size-2)) {
+                score += 2;
+                levelUpNoScoreIncrement();
+                return;
+            }
+            //TODO: unreachable locations has very rare bug where block isn't placed, causes infinite loop
+            var wallsAddedInUnreachableLocations = pathway.addWallsInUnreachableLocations();
+            score += wallsAddedInUnreachableLocations.length;
+            for (var w = 0; w < wallsAddedInUnreachableLocations.length; w++) {
+                var unreachableWall = null;
                 if (level > 3) {
-                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]});
+                    unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: rainbowColors[Math.floor(Math.random() * (rainbowColors.length))]});
                 } else {
-                    newWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor});
+                    unreachableWall = new square({x: -50, y: -50, width: 50, height: 50, color: wallColor});
                 }
-                var tempPos = pathway.addRandom('wall');
-                newWall.place(tempPos);
-                var options = pathway.getOptions(player.returnPos());
-                var neighbors = [];
-                for (var i = 0; i < options.length; i ++) {
-                    neighbors.push(options[i].object);
-                }
-                while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1)  || doRectsCollide(player.returnRect(), newWall.returnRect())) {
-                    pathway.removeWalls([tempPos]);
-                    tempPos = pathway.addRandom('wall');
-                    newWall.place(tempPos);
-                    options = pathway.getOptions(player.returnPos());
-                    neighbors = [];
-                    for (var i = 0; i < options.length; i ++) {
-                        neighbors.push(options[i].object);
-                    }
-                }
-                newWall.place(tempPos);
-                walls.push(newWall);
-                wallPos.push(newWall.returnPos());
-                tempPos = pathway.addRandom('objective');
-                objective.place(tempPos);
-                resetClock();
+                unreachableWall.place(wallsAddedInUnreachableLocations[w]);
+                walls.push(unreachableWall);
+                wallPos.push(unreachableWall.returnPos());
             }
+            if (walls.length >= (size*size-2)) {
+                score += 2;
+                levelUpNoScoreIncrement();
+                return;
+            }
+
+            
+            tempPos = pathway.addRandom('objective');
+            objective.place(tempPos);
+            resetClock();
         }
     }
     timeLabel = (Math.round(seconds * 10) / 10).toString();
@@ -511,8 +467,10 @@ function levelUpNoScoreIncrement() {
     level += 1;
     pathway.removeWalls(wallPos);
     walls = addWalls();
-    if (lowestTime > size/2-2) {
+    if (lowestTime >= getMinTimeBasedOnSize(size)) {
         lowestTime -= 1;
+    } else {
+        lowestTime = getMinTimeBasedOnSize(size);
     }
     tempPos = pathway.addRandom('objective');
     objective.place(tempPos);
@@ -765,9 +723,35 @@ function drawWalls() {
     }
 }
 
+function updateMenuAnimation() {
+    var objectiveAchieved = doRectsCollide(playerMenuRect, objectiveMenuRect);
+    if (objectiveAchieved) {
+        switchMenuObjective();
+        menuSpeed = -1 * menuSpeed;
+    }
+    var newPlayerPos = {x: playerMenu.returnPos().x + menuSpeed, y: playerMenu.returnPos().y};
+    playerMenu.move(newPlayerPos);
+
+}
+
+function switchMenuObjective() {
+    var newX;
+    if (objectiveMenu.returnPos().x < 100) {
+        newX = 400;
+    } else {
+        newX = 50;
+    }
+    var newObjectivePos = {x: newX, y: objectiveMenu.returnPos().y};
+    objectiveMenu.place(newObjectivePos);
+}
+
 function drawMenu() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    updateMenuAnimation(); 
     drawBackground();
+    drawRect(playerMenuRect);
+    drawRect(objectiveMenuRect);
     drawRect(sixButton);
     drawRect(tenButton);
     drawRect(fourteenButton);
@@ -839,8 +823,11 @@ function getAllTimeScores() {
 
         
 function resetClock() {
-    if (allowed > lowestTime) {
-        allowed -= .5;
+    var decrement = 0.5;
+    if (allowed - decrement >= lowestTime) {
+        allowed -= decrement;
+    } else {
+        allowed = lowestTime
     }
     seconds = allowed;
     milliseconds = 0;
