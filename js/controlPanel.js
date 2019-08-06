@@ -137,6 +137,12 @@ var timeLabel = "0.0";
 var scoreLabel = "0";
 const smoothBasePlayerSpeed = 6;
 
+const fps = 60;
+const fpsInterval = 1000 / fps;
+var then, startTime, now, elapsed;
+then = Date.now();
+startTime = Date.now();
+
 setInterval(gameLoop, 10);
 
 function gameLoop() {
@@ -163,7 +169,19 @@ function gameLoop() {
     } else {
 
     }
-    requestAnimationFrame(drawAll);
+    
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    now = Date.now();
+    elapsed = now - then;
+
+    if (elapsed > fpsInterval) {
+        then = now - (elapsed % fpsInterval);
+        drawAll();
+    }
 }
 
 function drawRect(rect) {
@@ -265,6 +283,10 @@ function handleGameKeysDown(e) {
             if (highScoreName.length === 20) { return; }
             highScoreName += e.key;
 
+        } else if (e.keyCode === 27) {
+            playingGame = false;
+            resetGame();
+            return;
         }
         return;
     }
@@ -368,7 +390,7 @@ function getMousePlayerSpeed() {
 }
 
 function playGame(smooth) {
-    seconds = allowed - milliseconds/1000;
+    seconds = allowed - milliseconds/1000; 
     if (isMouseDown) {
         mp = getMousePos(canvas, curMouseEvent);
         x = mp.x;
@@ -416,7 +438,6 @@ function playGame(smooth) {
             for (var i = 0; i < options.length; i++) {
                 neighbors.push(options[i].object);
             }
-            //TODO: there is sometimes a glitch in score (e.g. giving 33pts/clear on mini instead of 32)
             while ((neighbors.indexOf("_") === -1 && neighbors.indexOf("O") === -1) || doRectsCollide(player.returnRect(), newWall.returnRect())) {
                 if (walls.length === size * size - 4) {
                     score += 4;
@@ -838,7 +859,7 @@ function getAllTimeScores() {
 
         
 function resetClock() {
-    var decrement = size / 6;
+    var decrement = size / 6 - 0.4;
     if (allowed - decrement >= lowestTime) {
         allowed -= decrement;
     } else {
